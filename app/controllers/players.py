@@ -17,5 +17,5 @@ def get_player_route(id, db: Session = Depends(get_db)):
     return player_service.get_player(db=db, player_id=id)
 
 @router.put("/{id}", response_model=PlayerResponse, status_code=status.HTTP_202_ACCEPTED)
-def update_player_route(id, player:PlayerUpdate, db: Session = Depends(get_db)):
-    return "teste"
+def update_player_route(id, player_up:PlayerUpdate, db: Session = Depends(get_db)):
+    return player_service.update_player(db=db, player_id=id ,player_up=PlayerUpdate)

@@ -1,1 +1,9 @@
+# Ambiente venv 
 .venv/
+
+#cache
+__pycache__/
+*.pyc
+
+# Banco de dados
+*.db

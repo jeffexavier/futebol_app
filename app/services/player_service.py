@@ -25,7 +25,11 @@ def get_player(db:Session, player_id: int):
     return db_player
 
 def update_player(db:Session, player_id: int, player_up: PlayerUpdate):
+    id: int = player_id
+    
     player_data = player_up.model_dump()
+
+    db_player = db.get(Player, id)
 
     db_player = Player(**player_data)
 
