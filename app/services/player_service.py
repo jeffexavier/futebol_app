@@ -17,24 +17,25 @@ def create_player(db: Session, player_in: PlayerCreate):
     return db_player
 
 def get_player(db:Session, player_id: int):
-
-    id: int = player_id
     
-    db_player = db.get(Player, id)
+    db_player = db.get(Player, player_id)
 
     return db_player
 
 def update_player(db:Session, player_id: int, player_up: PlayerUpdate):
-    id: int = player_id
-    
-    player_data = player_up.model_dump()
 
-    db_player = db.get(Player, id)
+    db_player = db.get(Player, player_id)
 
-    db_player = Player(**player_data)
+    if not db_player:
+        return None
+
+
+    update_data = player_up.model_dump(exclude_unset=True)
+
+    for key, value in update_data.items():
+        setattr(db_player, key, value)
 
     db.add(db_player)
-
     db.commit()
 
     db.refresh(db_player)
