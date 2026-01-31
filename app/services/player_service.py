@@ -41,3 +41,16 @@ def update_player(db:Session, player_id: int, player_up: PlayerUpdate):
     db.refresh(db_player)
 
     return db_player
+
+def delete_player(db: Session, player_id: int):
+
+    db_player = db.get(Player, player_id)
+
+    if not db_player:
+        return None
+    
+    db.delete(db_player)
+
+    db.commit()
+
+    return db_player
