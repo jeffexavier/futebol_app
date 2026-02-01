@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import select
 from app.models.player import Player
 from app.schemas.player import PlayerCreate, PlayerUpdate
 
@@ -15,6 +16,21 @@ def create_player(db: Session, player_in: PlayerCreate):
     db.refresh(db_player)
 
     return db_player
+
+def get_players(db:Session, paid_only: bool = False, only_present: bool = None,  limit: int = 100):
+    query = select(Player)
+    
+    if paid_only != None:
+        query = query.where(Player.has_paid_monthly_fee == paid_only)
+
+    if only_present != None:
+        query = query.where(Player.is_present == only_present)
+
+    query = query.limit(limit)
+
+    result = db.execute(query)
+    
+    return result.scalars().all()
 
 def get_player(db:Session, player_id: int):
     
