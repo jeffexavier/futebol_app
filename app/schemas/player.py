@@ -21,3 +21,6 @@ class PlayerResponse(PlayerBase):
 
     class Config:
         from_attributes = True
+
+class PlayerDeleteResponse(PlayerResponse):
+    deleted: bool = True
