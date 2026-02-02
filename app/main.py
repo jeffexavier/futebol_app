@@ -1,7 +1,11 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from app.database import engine, Base
-from app.controllers import players
+from app.models.player import Player
+from app.models.checkin import Checkin
+
+
+from app.controllers import players, checkins
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -21,6 +25,7 @@ app = FastAPI(
 )
 
 app.include_router(players.router, prefix="/players", tags=["Players"])
+app.include_router(checkins.router, prefix="/matches", tags=["Matches"])
 
 @app.get("/")
 def health_check():

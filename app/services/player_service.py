@@ -17,14 +17,11 @@ def create_player(db: Session, player_in: PlayerCreate):
 
     return db_player
 
-def get_players(db:Session, paid_only: bool = False, only_present: bool = None,  limit: int = 100):
+def get_players(db:Session, paid_only: bool = False, limit: int = 100):
     query = select(Player)
     
     if paid_only != None:
         query = query.where(Player.has_paid_monthly_fee == paid_only)
-
-    if only_present != None:
-        query = query.where(Player.is_present == only_present)
 
     query = query.limit(limit)
 
