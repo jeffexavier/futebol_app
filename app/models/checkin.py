@@ -1,6 +1,7 @@
 from sqlalchemy import Integer, BigInteger, String, Boolean, DateTime, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
+from typing import Optional
 from app.database import Base
 
 class Checkin(Base):
@@ -10,5 +11,6 @@ class Checkin(Base):
     player_id: Mapped[int] = mapped_column(Integer, ForeignKey("players.id"), unique=True)
     arrival_time: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
     queue_position: Mapped[int] = mapped_column(BigInteger, index=True)
+    deleted_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
 
     player = relationship("Player")

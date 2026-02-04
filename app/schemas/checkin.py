@@ -14,8 +14,12 @@ class CheckinResponse(CheckinBase):
     id: int
     queue_position: int
     arrival_time: datetime
+    deleted_at: Optional[datetime]
 
     player: PlayerResponse
 
     class Config:
         from_attributes = True
+
+class CheckinDeleteResponse(CheckinResponse):
+    deleted: bool = True

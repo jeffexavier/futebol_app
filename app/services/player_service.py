@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select
 from app.models.player import Player
 from app.schemas.player import PlayerCreate, PlayerUpdate
+from app.services import audit_log_service
 
 def create_player(db: Session, player_in: PlayerCreate):
 
@@ -10,6 +11,8 @@ def create_player(db: Session, player_in: PlayerCreate):
     db_player = Player(**player_data)
 
     db.add(db_player)
+
+    audit_log_service.create_log(db, f"Jogador {db_player.name} foi adicionado.")
 
     db.commit()
 
@@ -42,13 +45,13 @@ def update_player(db:Session, player_id: int, player_up: PlayerUpdate):
     if not db_player:
         return None
 
-
     update_data = player_up.model_dump(exclude_unset=True)
 
     for key, value in update_data.items():
         setattr(db_player, key, value)
 
     db.add(db_player)
+    audit_log_service.create_log(db, f"Jogador {db_player.name} foi atualizado.")
     db.commit()
 
     db.refresh(db_player)
@@ -63,7 +66,7 @@ def delete_player(db: Session, player_id: int):
         return None
     
     db.delete(db_player)
-
+    audit_log_service.create_log(db, f"Jogador {db_player.name} foi deletado.")
     db.commit()
 
     return db_player
