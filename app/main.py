@@ -1,7 +1,12 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from app.database import engine, Base
-from app.controllers import players
+from app.models.player import Player
+from app.models.checkin import Checkin
+from app.models.audit_log import AuditLog
+
+
+from app.controllers import players, checkins, audit_logs
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -21,6 +26,8 @@ app = FastAPI(
 )
 
 app.include_router(players.router, prefix="/players", tags=["Players"])
+app.include_router(checkins.router, prefix="/checkins", tags=["Checkins"])
+app.include_router(audit_logs.router, prefix="/logs", tags=["Logs"])
 
 @app.get("/")
 def health_check():
