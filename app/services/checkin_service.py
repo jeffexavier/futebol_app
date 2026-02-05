@@ -6,7 +6,7 @@ from datetime import datetime
 from app.models.checkin import Checkin
 from app.models.player import Player
 from app.services import audit_log_service
-from app.schemas.checkin import CheckinCreate
+from app.schemas.checkin import CheckinCreate, CheckinUpdate
 
 def get_next_position(db:Session) -> int:
     max_pos = db.query(func.max(Checkin.queue_position)).scalar()
@@ -65,9 +65,30 @@ def get_checkins(db: Session, only_active: bool = None, limit: int = 100):
 
     return result.scalars().all()
 
-def get_checkin(db: Session, checkin_id = int):
+def get_checkin(db: Session, checkin_id: int):
 
     db_checkin = db.get(Checkin, checkin_id)
+
+    return db_checkin
+
+def update_checkin(db: Session, checkin_id: int, checkin_up: CheckinUpdate):
+    db_checkin = db.get(Checkin, checkin_id)
+
+    if not db_checkin:
+        print("caiu_aqui")
+        return None
+
+    update_data = checkin_up.model_dump(exclude_unset=True)
+
+    for key, value in update_data.items():
+        setattr(db_checkin, key, value)
+
+    db.add(db_checkin)
+
+    audit_log_service.create_log(db, f"Checkin ID = {db_checkin.id} foi atualizado.")    
+    db.commit()
+
+    db.refresh(db_checkin)
 
     return db_checkin
 

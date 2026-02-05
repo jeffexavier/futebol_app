@@ -10,6 +10,9 @@ class CheckinBase(BaseModel):
 class CheckinCreate(CheckinBase):
     pass
 
+class CheckinUpdate(BaseModel):
+    deleted_at: Optional[datetime] = None
+
 class CheckinResponse(CheckinBase):
     id: int
     queue_position: int

@@ -4,7 +4,7 @@ from typing import List
 
 #from app.database import SessionLocal
 from app.dependencies import get_db
-from app.schemas.checkin import CheckinCreate, CheckinResponse
+from app.schemas.checkin import CheckinCreate, CheckinUpdate, CheckinResponse
 from app.services import checkin_service
 
 router = APIRouter()
@@ -29,6 +29,19 @@ def get_checkin_route(id, db: Session = Depends(get_db)):
         )
 
     return checkin
+
+@router.put("/{id}", response_model=CheckinResponse, status_code=status.HTTP_202_ACCEPTED)
+def update_checkin_route(id, checkin_up: CheckinUpdate, db: Session = Depends(get_db)):
+    updated_checkin = checkin_service.update_checkin(db = db, checkin_id=id, checkin_up = checkin_up)
+
+    if not updated_checkin:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Checkin não encontrado para atualizar!"
+        )
+    
+    return updated_checkin
+
 
 @router.delete("/{id}", response_model=CheckinResponse, status_code=status.HTTP_200_OK)
 def delete_checkin_route(id, db: Session = Depends(get_db)):

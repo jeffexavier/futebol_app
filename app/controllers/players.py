@@ -36,7 +36,7 @@ def update_player_route(id, player_up: PlayerUpdate, db: Session = Depends(get_d
     if not updated_player:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Jogador não encontrado para deletar!"
+            detail="Jogador não encontrado para atualizar!"
         )
 
     return updated_player

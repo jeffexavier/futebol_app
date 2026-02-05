@@ -51,6 +51,7 @@ def update_player(db:Session, player_id: int, player_up: PlayerUpdate):
         setattr(db_player, key, value)
 
     db.add(db_player)
+    
     audit_log_service.create_log(db, f"Jogador {db_player.name} foi atualizado.")
     db.commit()
 
