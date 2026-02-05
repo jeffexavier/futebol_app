@@ -3,10 +3,11 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select, func
 from datetime import datetime
 
+
 from app.models.checkin import Checkin
 from app.models.player import Player
-from app.services import audit_log_service
 from app.schemas.checkin import CheckinCreate, CheckinUpdate
+from app.services import audit_log_service
 
 def get_next_position(db:Session) -> int:
     max_pos = db.query(func.max(Checkin.queue_position)).scalar()
