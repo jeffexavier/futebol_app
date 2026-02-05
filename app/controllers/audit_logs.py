@@ -9,5 +9,5 @@ from app.services import audit_log_service
 router = APIRouter()
 
 @router.get("/", response_model=List[AuditLogResponse], status_code=status.HTTP_200_OK)
-def get_audit_logs_route(db: Session = Depends(get_db)):
-    return audit_log_service.get_logs(db=db)
+def get_audit_logs_route(order_desc: bool = True , limit: int = 10, db: Session = Depends(get_db)):
+    return audit_log_service.get_logs(db=db, order_desc = order_desc, limit=limit)
