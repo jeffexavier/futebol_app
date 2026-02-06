@@ -1,0 +1,10 @@
+services:
+  api:
+    build: .
+    container_name: futebol_app_api
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    environment:
+      - DATABASE_URL=sqlite:///./society.db
