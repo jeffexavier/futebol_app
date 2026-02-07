@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select, func
 from typing import List
 from datetime import datetime
+import random
 
 from app.models.checkin import Checkin
 from app.schemas.match import MatchResultEnum, MatchEndRequest, MatchStateResponse
@@ -11,7 +12,7 @@ from app.services import audit_log_service, checkin_service
 def get_current_match_state(db: Session) -> MatchStateResponse:
 
     query = select(Checkin).where(Checkin.deleted_at.is_(None)).order_by(Checkin.queue_position.asc())
-    all_checkins = db.execute(query).scalars().all()
+    all_checkins = db.scalars(query).all()
 
     t_a = all_checkins[:7]
     t_b = all_checkins[7:14]
@@ -29,16 +30,40 @@ def get_current_match_state(db: Session) -> MatchStateResponse:
         match_time_rule = match_time_rule_text
     )
 
-def process_draw(db:Session, state: MatchStateResponse):
+def randomize_first_teams(db: Session):
+
+    current_match_state = get_current_match_state(db)
+
+    teams_checkins = current_match_state.team_a + current_match_state.team_b
+
+    random.shuffle(teams_checkins)
+
+    new_team_a = teams_checkins[:14]
+    new_team_b = teams_checkins[7:14]
+
+    ids_team_a = [c.id for c in new_team_a]
+    ids_team_b = [c.id for c in new_team_b]
+
+    real_checkins_team_a = db.scalars(select(Checkin).where(Checkin.id.in_(ids_team_a))).all()
+    real_checkins_team_a.sort(key=lambda x: x.arrival_time)
+
+    # for index, checkin in enumerate()
+
+
+    return real_checkins_team_a
+
+
+
+def process_draw(db: Session, state: MatchStateResponse):
     next_pos = checkin_service.get_next_position(db)
     
     teams_checkins = state.team_a + state.team_b
 
     ids_to_update = [c.id for c in teams_checkins]
 
-    real_checkins = db.execute(select(Checkin).where(Checkin.id.in_(ids_to_update))).scalars().all()
+    real_checkins = db.scalars(select(Checkin).where(Checkin.id.in_(ids_to_update))).all()
 
-    real_checkins.sort(key=lambda x: x.queue_position)
+    real_checkins.sort(key=lambda x: x.arrival_time)
 
     player_names = []
 
@@ -56,14 +81,14 @@ def process_draw(db:Session, state: MatchStateResponse):
     return get_current_match_state(db)
 
 
-def rotate_team(db:Session, team_checkins: List[Checkin]):
+def rotate_team(db: Session, team_checkins: List[Checkin]):
     next_pos = checkin_service.get_next_position(db)
 
     ids_to_update = [c.id for c in team_checkins]
 
-    real_checkins = db.execute(select(Checkin).where(Checkin.id.in_(ids_to_update))).scalars().all()
+    real_checkins = db.scalars(select(Checkin).where(Checkin.id.in_(ids_to_update))).all()
 
-    real_checkins.sort(key=lambda x: x.queue_position)
+    real_checkins.sort(key=lambda x: x.arrival_time)
 
     player_names = []
 
@@ -81,7 +106,7 @@ def rotate_team(db:Session, team_checkins: List[Checkin]):
     return get_current_match_state(db)
 
 
-def end_match(db:Session, match_result: MatchEndRequest):
+def end_match(db: Session, match_result: MatchEndRequest):
     state = get_current_match_state(db)
 
     if match_result.result == MatchResultEnum.losing_team_a:

@@ -4,7 +4,7 @@ from typing import List
 
 #from app.database import SessionLocal
 from app.dependencies import get_db
-from app.schemas.checkin import CheckinCreate, CheckinUpdate, CheckinResponse
+from app.schemas.checkin import CheckinUpdate, CheckinResponse
 from app.schemas.player import PlayerCreate
 from app.services import checkin_service
 

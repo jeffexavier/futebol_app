@@ -71,9 +71,9 @@ def get_checkins(db: Session, only_active: bool = None, limit: int = 100):
 
     query = query.limit(limit)
 
-    result = db.execute(query)
+    result = db.scalars(query)
 
-    return result.scalars().all()
+    return result.all()
 
 def get_checkin(db: Session, checkin_id: int):
 
