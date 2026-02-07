@@ -38,7 +38,7 @@ def randomize_first_teams(db: Session):
 
     random.shuffle(teams_checkins)
 
-    new_team_a = teams_checkins[:14]
+    new_team_a = teams_checkins[:7]
     new_team_b = teams_checkins[7:14]
 
     ids_team_a = [c.id for c in new_team_a]
@@ -47,10 +47,28 @@ def randomize_first_teams(db: Session):
     real_checkins_team_a = db.scalars(select(Checkin).where(Checkin.id.in_(ids_team_a))).all()
     real_checkins_team_a.sort(key=lambda x: x.arrival_time)
 
-    # for index, checkin in enumerate()
+    real_checkins_team_b = db.scalars(select(Checkin).where(Checkin.id.in_(ids_team_b))).all()
+    real_checkins_team_b.sort(key=lambda x: x.arrival_time)
 
+    player_names_t_a = []
+    player_names_t_b = []
 
-    return real_checkins_team_a
+    for index, checkin in enumerate(real_checkins_team_a):
+        checkin.queue_position = index + 1
+        player_names_t_a.append(checkin.player.name)
+
+    for index, checkin in enumerate(real_checkins_team_b):
+        checkin.queue_position = index + 8
+        player_names_t_b.append(checkin.player.name)
+    
+    audit_log_service.create_log(
+        db,
+        f"Time A sorteado: {', '.join(player_names_t_a)} | Time B sorteado: {', '.join(player_names_t_b)}"
+    )
+
+    db.commit()
+
+    return get_current_match_state(db)
 
 
 
