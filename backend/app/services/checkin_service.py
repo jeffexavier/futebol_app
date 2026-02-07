@@ -3,30 +3,38 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select, func
 from datetime import datetime
 
-
 from app.models.checkin import Checkin
 from app.models.player import Player
 from app.schemas.checkin import CheckinCreate, CheckinUpdate
-from app.services import audit_log_service
+from app.schemas.player import PlayerCreate
+from app.services import audit_log_service, player_service
 
 def get_next_position(db:Session) -> int:
     max_pos = db.query(func.max(Checkin.queue_position)).scalar()
     return(max_pos or 0) + 1
 
-def create_checkin(db: Session, checkin_in: CheckinCreate):
+def create_checkin(db: Session, checkin_in: PlayerCreate):
 
-    player_id = checkin_in.player_id
-    db_player = db.get(Player, player_id)
+    player_name = checkin_in.name.strip().title()
+    
+    db_player = db.scalars(select(Player).filter(Player.name == player_name)).first()
 
     if not db_player:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Jogador ID = {player_id} não encontrado!"
+        print(f"Jogador {player_name} não encontrado. Criando novo...")
+        try:
+            player_in = PlayerCreate(name=player_name)
+            db_player = player_service.create_player(db, player_in)
+        except HTTPException as e:
+            raise e
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Erro ao criar jogador."
             )
 
-    existing_checkin = db.execute(
-        select(Checkin).where(Checkin.player_id == player_id)
-    ).scalar_one_or_none()
+    existing_checkin = db.scalars(
+        select(Checkin).where(Checkin.player_id == db_player.id)
+    ).one_or_none()
 
     if existing_checkin:
         raise HTTPException(
@@ -36,9 +44,10 @@ def create_checkin(db: Session, checkin_in: CheckinCreate):
 
     next_pos = get_next_position(db)
 
-    checkin_data =  checkin_in.model_dump() 
-
-    db_checkin = Checkin(**checkin_data, queue_position=next_pos)
+    db_checkin = Checkin(
+        player_id=db_player.id,
+        queue_position=next_pos
+    )
 
     db.add(db_checkin)
 

@@ -1,22 +1,38 @@
-from sqlalchemy.orm import Session
+from fastapi import HTTPException, status
 from sqlalchemy import select
+from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from app.models.player import Player
 from app.schemas.player import PlayerCreate, PlayerUpdate
 from app.services import audit_log_service
 
 def create_player(db: Session, player_in: PlayerCreate):
 
+    player_in.name = player_in.name.strip().title()
     player_data = player_in.model_dump()
 
     db_player = Player(**player_data)
 
-    db.add(db_player)
+    try:
+        db.add(db_player)
+        audit_log_service.create_log(db, f"Jogador {db_player.name} foi adicionado.")
+        db.commit()
+        db.refresh(db_player)
 
-    audit_log_service.create_log(db, f"Jogador {db_player.name} foi adicionado.")
+    except IntegrityError as e:
+        db.rollback()
 
-    db.commit()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"O jogador '{player_in.name}' já está cadastrado."
+        )
 
-    db.refresh(db_player)
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Erro interno ao crir jogador."
+        )
 
     return db_player
 

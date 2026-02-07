@@ -5,12 +5,13 @@ from typing import List
 #from app.database import SessionLocal
 from app.dependencies import get_db
 from app.schemas.checkin import CheckinCreate, CheckinUpdate, CheckinResponse
+from app.schemas.player import PlayerCreate
 from app.services import checkin_service
 
 router = APIRouter()
 
 @router.post("/", response_model=CheckinResponse, status_code=status.HTTP_201_CREATED)
-def create_checkin_route(checkin_in: CheckinCreate, db: Session = Depends(get_db)):
+def create_checkin_route(checkin_in: PlayerCreate, db: Session = Depends(get_db)):
     return checkin_service.create_checkin(db = db, checkin_in = checkin_in)
 
 @router.get("/", response_model=List[CheckinResponse], status_code=status.HTTP_200_OK)

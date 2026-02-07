@@ -5,7 +5,7 @@ from datetime import datetime
 from app.schemas.player import PlayerResponse
 
 class CheckinBase(BaseModel):
-    player_id: int
+    player_id: str
     
 class CheckinCreate(CheckinBase):
     pass
@@ -13,8 +13,9 @@ class CheckinCreate(CheckinBase):
 class CheckinUpdate(BaseModel):
     deleted_at: Optional[datetime] = None
 
-class CheckinResponse(CheckinBase):
+class CheckinResponse(BaseModel):
     id: int
+    player_id: int
     queue_position: int
     arrival_time: datetime
     deleted_at: Optional[datetime]

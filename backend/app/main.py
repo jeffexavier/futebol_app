@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine, Base
 from app.models.player import Player
 from app.models.checkin import Checkin
@@ -23,6 +24,21 @@ app = FastAPI(
     description="API para organizar a pelada de quarta-feira.",
     version="1.0.0",
     lifespan=lifespan
+)
+
+origins = [
+    "http://localhost:5173",    # Vite (React padrão)
+    "http://localhost:3000",    # React Create App
+    "http://127.0.0.1:5173",    # Às vezes o navegador usa IP
+    "http://localhost",         # Genérico
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,      # Permite as origens listadas acima
+    allow_credentials=True,
+    allow_methods=["*"],        # Permite GET, POST, PUT, DELETE, etc.
+    allow_headers=["*"],        # Permite enviar JSON, Tokens, etc.
 )
 
 app.include_router(players.router, prefix="/players", tags=["Players"])
