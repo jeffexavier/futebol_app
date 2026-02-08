@@ -3,9 +3,8 @@ import { Input } from "@heroui/input";
 import { createCheckin } from "@/services/checkin";
 import { useState } from "react";
 import { AxiosError } from "axios";
-import CheckinForm from "@/components/checkin-form";
 
-export default function Checkin(){
+export default function CheckinForm(){
 
     const [playerName, setPlayerName] = useState<string>("");
     const [isLoading, setIsLoading] = useState(false);
@@ -42,8 +41,24 @@ export default function Checkin(){
 
 
     return (
-        <div className="flex flex-col justify-center items-center bg-gray-950 min-h-screen w-screen p-4">
-            <CheckinForm />
+        <div className="flex flex-col justify-center items-center bg-gray-950 w-full gap-6">
+            <h1 className="text-3xl text-amber-400 font-bold text-center">Pelada de Quarta ⚽</h1>
+            <div className="flex flex-col w-full gap-4">
+                <Input
+                    type="text"
+                    label="Seu nome"
+                    description="Nome que aparecerá na lista de jogo."
+                    errorMessage={status?.msg}
+                    isInvalid={status?.type === 'error' ? true : false}
+                    onChange={e => setPlayerName(e.target.value)}
+                    value={playerName}
+                    size="lg"
+                    color="default"
+                />
+            <Button size="lg" color="warning" fullWidth isDisabled={isLoading} onPress={handleCheckin}>
+                <p className="font-extrabold">COLOCAR NOME NA LISTA</p>
+            </Button>
+            </div>
         </div>
     );
 }

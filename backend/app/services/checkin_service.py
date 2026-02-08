@@ -16,6 +16,12 @@ def get_next_position(db:Session) -> int:
 def create_checkin(db: Session, checkin_in: PlayerCreate):
 
     player_name = checkin_in.name.strip().title()
+
+    if player_name == "":
+        raise HTTPException(
+            status_code=status.HTTP_411_LENGTH_REQUIRED,
+            detail="Insira pelo o menos 1 caractere!"
+        )
     
     db_player = db.scalars(select(Player).filter(Player.name == player_name)).first()
 
@@ -38,7 +44,7 @@ def create_checkin(db: Session, checkin_in: PlayerCreate):
 
     if existing_checkin:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_409_CONFLICT,
             detail="Jogador já está na fila!"
             )
 
