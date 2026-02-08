@@ -18,7 +18,7 @@ def get_current_match_state(db: Session) -> MatchStateResponse:
     t_b = all_checkins[7:14]
     waiting = all_checkins[14:]
 
-    if len(waiting) >= 7:
+    if len(waiting) >= 14:
         match_time_rule_text = "8 Minutos"
     else:
         match_time_rule_text = "10 minutos"
