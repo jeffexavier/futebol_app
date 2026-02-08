@@ -27,3 +27,9 @@ pnpm-lock.yaml
 yarn.lock
 package-lock.json
 bun.lockb
+
+# Variáveis de ambiente
+.env
+
+#Config do vscode
+.vscode/
