@@ -16,9 +16,13 @@ def get_current_match_state(db: Session) -> MatchStateResponse:
 
     t_a = all_checkins[:7]
     t_b = all_checkins[7:14]
-    waiting = all_checkins[14:]
+    w_t_1 = all_checkins[14:21]
+    w_t_2 = all_checkins[21:28]
+    f_l = all_checkins[28:]
 
-    if len(waiting) >= 14:
+    w_l = all_checkins[14:]
+
+    if len(w_t_1 + w_t_2) >= 14:
         match_time_rule_text = "8 Minutos"
     else:
         match_time_rule_text = "10 minutos"
@@ -26,7 +30,9 @@ def get_current_match_state(db: Session) -> MatchStateResponse:
     return MatchStateResponse(
         team_a = t_a,
         team_b = t_b,
-        waiting_list = waiting,
+        waiting_team_1 = w_t_1,
+        waiting_team_2 = w_t_2,
+        following_list = f_l,
         match_time_rule = match_time_rule_text
     )
 
