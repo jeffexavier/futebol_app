@@ -1,49 +1,20 @@
-import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
-import { createCheckin } from "@/services/checkin";
-import { useState } from "react";
-import { AxiosError } from "axios";
-import CheckinForm from "@/components/checkin-form";
+import { useNavigate } from "react-router-dom";
+import CheckinForm from "@/components/checkin/checkin-form";
 
 export default function Checkin(){
 
-    const [playerName, setPlayerName] = useState<string>("");
-    const [isLoading, setIsLoading] = useState(false);
-    const [status, setStatus] = useState<{ type: 'success' | 'error', msg: string } | null>(null);
+    const navigate = useNavigate();
 
-    async function handleCheckin() {
-
-        try {
-            setStatus(null);
-            setIsLoading(true);
-
-            await createCheckin(playerName);
-            
-            setStatus({type: 'success', msg: `Bora! ${playerName} entrou na fila! ⚽`});
-            setPlayerName("");
-        } catch (error) {
-            console.error("Erro no checkin: ", error);
-
-            const err = error as AxiosError;
-
-            if (err.response?.status === 409) {
-                setStatus({ type: 'error', msg: "Esse jogador já está na fila!" });
-            } else if (err.response?.status === 411) {
-                setStatus({ type: 'error', msg: "Insira pelo o menos um caractere!" });
-            } else if (err.response?.status === 422) {
-                setStatus({ type: 'error', msg: "Nome inválido." });
-            } else {
-                setStatus({ type: 'error', msg: "Erro ao entrar. Tente novamente." });
-            }
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
+    function handleRedirect() {
+        setTimeout(() => {
+            navigate("/matches");
+        }, 1000);
+    }
 
     return (
-        <div className="flex flex-col justify-center items-center bg-gray-950 min-h-screen w-screen p-4">
-            <CheckinForm />
+        <div className="flex flex-col justify-center items-center min-h-screen w-screen p-4 gap-6">
+            <h1 className="text-2xl text-amber-400 font-bold text-center">PELADA DE QUARTA ⚽</h1>
+            <CheckinForm onSuccess={handleRedirect}/>
         </div>
     );
 }
