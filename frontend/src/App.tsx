@@ -7,7 +7,7 @@ import AdminMatch from "./pages/admin/admin-match";
 function App() {
   return (
     <Routes>
-      <Route element={<Checkin />} path="/"/>
+      <Route element={<Checkin/>} path="/"/>
       <Route element={<Match />} path="/matches"/>
       <Route element={<AdminMatch />} path="/admin/matches"/>
     </Routes>
