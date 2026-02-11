@@ -1,16 +1,22 @@
 import { getMatch } from "@/services/match";
+import { deleteCheckin } from "@/services/checkin";
 import { Alert } from "@heroui/alert";
 import { useEffect, useState } from "react";
 import type { MatchResponse } from "@/types/match";
 
 import { Button } from "@heroui/button";
 import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell} from "@heroui/table";
-import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem} from "@heroui/dropdown"
-import { SearchIcon } from "../icons";
+import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem} from "@heroui/dropdown";
+import { TrashIcon } from "../icons";
 
-export default function MatchTable() {
+interface MatchTableProps {
+    matchTeamsList: MatchResponse | null;
+    fromAdminPage: boolean | null;
+};
 
-    const [matchData, setMatchData] = useState<MatchResponse | null>(null)
+export default function MatchTable({matchTeamsList, fromAdminPage}: MatchTableProps) {
+
+    const [matchData, setMatchData] = useState<MatchResponse | null>(matchTeamsList)
     
     async function handleGetCheckin() {
         try {
@@ -21,15 +27,42 @@ export default function MatchTable() {
         }
     }
 
+    async function handleDeleteCheckin(teamList: keyof MatchResponse, checkinId: number) {
+        try {
+            await deleteCheckin(checkinId);
+
+            if (!matchData) return;
+
+            const currentList = matchData[teamList];
+
+            if (Array.isArray(currentList)) {
+                const newTeamList = currentList.filter(item => item.id !== checkinId);
+                
+                setMatchData({
+                    ...matchData, [teamList]: newTeamList
+                });              
+            };
+
+            await handleGetCheckin();
+            
+        } catch (error) {
+            console.error(error); 
+        }
+    }
+
     useEffect(() => {
-        handleGetCheckin()
-    }, [])
+        if(matchTeamsList) {
+            setMatchData(matchTeamsList);
+        } else {
+            handleGetCheckin()
+        }
+    }, [matchTeamsList])
 
     return (
         <div className="flex flex-col justify-top items-center w-full gap-6">
             <Alert color="warning" variant="flat" description={matchData?.match_time_rule} title={"Tempo por partida"} />
             <div className="dark text-foreground flex w-full gap-4 items-stretch">
-                <Table>   
+                <Table aria-label="Table">   
                     <TableHeader>
                         <TableColumn>
                          {`TIME A (${matchData?.team_a.length})`} 
@@ -42,22 +75,25 @@ export default function MatchTable() {
                         {(item) => (
                             <TableRow onClick={(e) => console.log(e)} key={`${item.id}`}>
                                 <TableCell className="p-0">
+                                     { fromAdminPage ?
                                         <Dropdown className="dark text-foreground">
                                             <DropdownTrigger>
                                                 <Button fullWidth variant="light">{item.player.name}</Button>
                                             </DropdownTrigger>
                                             <DropdownMenu aria-label="Dynamic Actions">
-                                                <DropdownItem key="deletar" color="danger">
+                                                <DropdownItem key="deletar" endContent={<TrashIcon width={16} />} color="danger" onPress={() => handleDeleteCheckin("team_a", item.id)}>
                                                    Deletar
                                                 </DropdownItem>
                                             </DropdownMenu>
-                                        </Dropdown>
+                                        </Dropdown> :
+                                        <Button fullWidth variant="light" isDisabled>{item.player.name}</Button>
+                                    }
                                 </TableCell>
                             </TableRow>
                         )}
                     </TableBody>
                 </Table>
-                <Table>
+                <Table aria-label="Table">
                     <TableHeader>
                         <TableColumn>
                             {`TIME B (${matchData?.team_b.length})`}
@@ -70,16 +106,19 @@ export default function MatchTable() {
                         {(item) => (
                             <TableRow  key={item.id}>
                                 <TableCell className="p-0">
-                                    <Dropdown className="dark text-foreground">
-                                        <DropdownTrigger>
-                                            <Button fullWidth variant="light">{item.player.name}</Button>
-                                        </DropdownTrigger>
-                                        <DropdownMenu aria-label="Dynamic Actions">
-                                            <DropdownItem key="deletar" color="danger">
-                                                Deletar
-                                            </DropdownItem>
-                                        </DropdownMenu>
-                                    </Dropdown>
+                                    { fromAdminPage ?
+                                        <Dropdown className="dark text-foreground">
+                                            <DropdownTrigger>
+                                                <Button fullWidth variant="light">{item.player.name}</Button>
+                                            </DropdownTrigger>
+                                            <DropdownMenu aria-label="Dynamic Actions">
+                                                <DropdownItem key="deletar" endContent={<TrashIcon width={16} />} color="danger" onPress={() => handleDeleteCheckin("team_b", item.id)}>
+                                                    Deletar
+                                                </DropdownItem>
+                                            </DropdownMenu>
+                                        </Dropdown> :
+                                        <Button fullWidth variant="light" isDisabled>{item.player.name}</Button>
+                                    }
                                 </TableCell>
                             </TableRow>
                         )}
@@ -88,7 +127,7 @@ export default function MatchTable() {
             </div>
             <div className="dark text-foreground  flex flex-col w-full p-0 gap-4">
                 { matchData && matchData?.waiting_team_1.length > 0 ?
-                    <Table>
+                    <Table aria-label="Table">
                         <TableHeader>
                             <TableColumn>
                                 {`PRIMEIRO PRÓXIMO (${matchData?.waiting_team_1.length})`}
@@ -102,16 +141,19 @@ export default function MatchTable() {
                             {(item) => (
                                 <TableRow className="p-0"  key={item.id}>
                                     <TableCell className="p-0">
-                                        <Dropdown className="dark text-foreground">
-                                            <DropdownTrigger>
-                                                <Button fullWidth variant="light">{item.player.name}</Button>
-                                            </DropdownTrigger>
-                                            <DropdownMenu aria-label="Dynamic Actions">
-                                                <DropdownItem key="deletar" color="danger">
-                                                   Deletar
-                                                </DropdownItem>
-                                            </DropdownMenu>
-                                        </Dropdown>
+                                        { fromAdminPage ?
+                                            <Dropdown className="dark text-foreground">
+                                                <DropdownTrigger>
+                                                    <Button fullWidth variant="light">{item.player.name}</Button>
+                                                </DropdownTrigger>
+                                                <DropdownMenu aria-label="Dynamic Actions">
+                                                    <DropdownItem key="deletar" endContent={<TrashIcon width={16} />} color="danger" onPress={() => handleDeleteCheckin("waiting_team_1", item.id)}>
+                                                    Deletar
+                                                    </DropdownItem>
+                                                </DropdownMenu>
+                                            </Dropdown> :
+                                            <Button fullWidth variant="light" isDisabled>{item.player.name}</Button>
+                                        }
                                     </TableCell>
                                 </TableRow>
                             )}
@@ -119,7 +161,7 @@ export default function MatchTable() {
                     </Table> : <></>
                 }
                 { matchData && matchData?.waiting_team_2.length > 0 ?
-                    <Table>
+                    <Table aria-label="Table">
                         <TableHeader>
                             <TableColumn>
                                 {`SEGUNDO PRÓXIMO (${matchData?.waiting_team_2.length})`}
@@ -132,16 +174,19 @@ export default function MatchTable() {
                             {(item) => (
                                 <TableRow key={item.id}>
                                     <TableCell className="p-0">
-                                        <Dropdown className="dark text-foreground">
-                                            <DropdownTrigger>
-                                                <Button fullWidth variant="light">{item.player.name}</Button>
-                                            </DropdownTrigger>
-                                            <DropdownMenu aria-label="Dynamic Actions">
-                                                <DropdownItem key="deletar" color="danger">
-                                                   Deletar
-                                                </DropdownItem>
-                                            </DropdownMenu>
-                                        </Dropdown>
+                                        { fromAdminPage ?
+                                            <Dropdown className="dark text-foreground">
+                                                <DropdownTrigger>
+                                                    <Button fullWidth variant="light">{item.player.name}</Button>
+                                                </DropdownTrigger>
+                                                <DropdownMenu aria-label="Dynamic Actions">
+                                                    <DropdownItem key="deletar" endContent={<TrashIcon width={16} />} color="danger" onPress={() => handleDeleteCheckin("waiting_team_2", item.id)}>
+                                                    Deletar
+                                                    </DropdownItem>
+                                                </DropdownMenu>
+                                            </Dropdown> :
+                                            <Button fullWidth variant="light" isDisabled>{item.player.name}</Button>
+                                        }
                                     </TableCell>
                                 </TableRow>
                             )}
@@ -149,7 +194,7 @@ export default function MatchTable() {
                     </Table> : <></>
                 }
                 { matchData && matchData?.following_list.length > 0 ?
-                    <Table>
+                    <Table aria-label="Table">
                         <TableHeader>
                             <TableColumn>
                                 {`LISTA DE ESPERA (${matchData?.following_list.length})`}
@@ -162,16 +207,20 @@ export default function MatchTable() {
                             {(item) => (
                                 <TableRow key={item.id}>
                                     <TableCell className="p-0">
-                                        <Dropdown className="dark text-foreground">
-                                            <DropdownTrigger>
-                                                <Button fullWidth variant="light">{item.player.name}</Button>
-                                            </DropdownTrigger>
-                                            <DropdownMenu aria-label="Dynamic Actions">
-                                                <DropdownItem key="deletar" color="danger">
-                                                   Deletar
-                                                </DropdownItem>
-                                            </DropdownMenu>
-                                        </Dropdown>
+                                        <Button fullWidth variant="light" isDisabled>{item.player.name}</Button>
+                                        { fromAdminPage ?
+                                            <Dropdown className="dark text-foreground">
+                                                <DropdownTrigger>
+                                                    <Button fullWidth variant="light">{item.player.name}</Button>
+                                                </DropdownTrigger>
+                                                <DropdownMenu aria-label="Dynamic Actions">
+                                                    <DropdownItem key="deletar" endContent={<TrashIcon width={16} />} color="danger" onPress={() => handleDeleteCheckin("following_list", item.id)}>
+                                                    Deletar
+                                                    </DropdownItem>
+                                                </DropdownMenu>
+                                            </Dropdown>:
+                                            <Button fullWidth variant="light" isDisabled>{item.player.name}</Button>
+                                        }
                                     </TableCell>
                                 </TableRow>
                             )}

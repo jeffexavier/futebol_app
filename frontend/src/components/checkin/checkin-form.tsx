@@ -6,7 +6,7 @@ import { AxiosError } from "axios";
 import { UserPlusIcon } from "../icons";
 
 interface CheckinFormProps {
-    onSuccess?: () => void;
+    onSuccess?: () => void;   
 }
 
 export default function CheckinForm({onSuccess}: CheckinFormProps){
