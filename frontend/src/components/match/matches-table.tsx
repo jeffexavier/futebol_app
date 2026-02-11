@@ -3,6 +3,7 @@ import { deleteCheckin } from "@/services/checkin";
 import { Alert } from "@heroui/alert";
 import { useEffect, useState } from "react";
 import type { MatchResponse } from "@/types/match";
+import RotateLoserTeamButton from "@/components/match/rotateLoserTeam";
 
 import { Button } from "@heroui/button";
 import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell} from "@heroui/table";
@@ -56,7 +57,7 @@ export default function MatchTable({matchTeamsList, fromAdminPage}: MatchTablePr
         } else {
             handleGetCheckin()
         }
-    }, [matchTeamsList])
+    }, [matchTeamsList, matchData])
 
     return (
         <div className="flex flex-col justify-top items-center w-full gap-6">
@@ -124,6 +125,9 @@ export default function MatchTable({matchTeamsList, fromAdminPage}: MatchTablePr
                         )}
                     </TableBody>
                 </Table>
+            </div>
+            <div className="w-full">
+                <RotateLoserTeamButton onSuccess={handleGetCheckin}/>
             </div>
             <div className="dark text-foreground  flex flex-col w-full p-0 gap-4">
                 { matchData && matchData?.waiting_team_1.length > 0 ?
@@ -207,7 +211,6 @@ export default function MatchTable({matchTeamsList, fromAdminPage}: MatchTablePr
                             {(item) => (
                                 <TableRow key={item.id}>
                                     <TableCell className="p-0">
-                                        <Button fullWidth variant="light" isDisabled>{item.player.name}</Button>
                                         { fromAdminPage ?
                                             <Dropdown className="dark text-foreground">
                                                 <DropdownTrigger>
