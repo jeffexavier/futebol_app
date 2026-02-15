@@ -13,9 +13,9 @@ def get_next_position(db:Session) -> int:
     max_pos = db.query(func.max(Checkin.queue_position)).scalar()
     return(max_pos or 0) + 1
 
-def create_checkin(db: Session, checkin_in: PlayerCreate):
-
+def create_checkin(db: Session, checkin_in: CheckinCreate):
     player_name = checkin_in.name.strip().title()
+    team = checkin_in.team
 
     if player_name == "":
         raise HTTPException(
@@ -52,7 +52,8 @@ def create_checkin(db: Session, checkin_in: PlayerCreate):
 
     db_checkin = Checkin(
         player_id=db_player.id,
-        queue_position=next_pos
+        queue_position=next_pos,
+        team=team
     )
 
     db.add(db_checkin)
@@ -122,5 +123,9 @@ def delete_checkin(db: Session, checkin_id: int):
     db.commit()
 
     db.refresh(db_checkin)
+
+
+
+
 
     return db_checkin
