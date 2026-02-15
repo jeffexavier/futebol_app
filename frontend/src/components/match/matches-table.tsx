@@ -103,7 +103,7 @@ export default function MatchTable({matchTeamsList, fromAdminPage}: MatchTablePr
                     <TableBody
                         items={matchData?.team_b || []}
                         emptyContent={"Ninguém no time B ainda."}
-                        >
+                    >
                         {(item) => (
                             <TableRow  key={item.id}>
                                 <TableCell className="p-0">
