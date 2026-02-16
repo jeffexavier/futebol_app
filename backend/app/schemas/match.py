@@ -14,7 +14,7 @@ class MatchEndRequest(BaseModel):
 
 class MatchStateResponse(BaseModel):
     team_a: List[CheckinResponse]
-    team_b: list[CheckinResponse]
+    team_b: List[CheckinResponse]
     waiting_team_1: List[CheckinResponse]
     waiting_team_2: List[CheckinResponse]
     following_list: List[CheckinResponse]

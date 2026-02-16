@@ -92,7 +92,6 @@ def update_checkin(db: Session, checkin_id: int, checkin_up: CheckinUpdate):
     db_checkin = db.get(Checkin, checkin_id)
 
     if not db_checkin:
-        print("caiu_aqui")
         return None
 
     update_data = checkin_up.model_dump(exclude_unset=True)
@@ -123,9 +122,5 @@ def delete_checkin(db: Session, checkin_id: int):
     db.commit()
 
     db.refresh(db_checkin)
-
-
-
-
 
     return db_checkin

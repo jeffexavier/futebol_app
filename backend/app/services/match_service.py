@@ -1,26 +1,32 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
-from sqlalchemy import select, func
+from sqlalchemy import select, func, or_
 from typing import List
 from datetime import datetime
 import random
 
 from app.models.checkin import Checkin
+from app.schemas.checkin import TeamSide
 from app.schemas.match import MatchResultEnum, MatchEndRequest, MatchStateResponse
 from app.services import audit_log_service, checkin_service
 
 def get_current_match_state(db: Session) -> MatchStateResponse:
 
-    query = select(Checkin).where(Checkin.deleted_at.is_(None)).order_by(Checkin.queue_position.asc())
-    all_checkins = db.scalars(query).all()
-
-    t_a = all_checkins[:7]
-    t_b = all_checkins[7:14]
-    w_t_1 = all_checkins[14:21]
-    w_t_2 = all_checkins[21:28]
-    f_l = all_checkins[28:]
-
-    w_l = all_checkins[14:]
+    # query = select(Checkin).where(Checkin.deleted_at.is_(None)).order_by(Checkin.queue_position.asc())
+    initial_query = select(Checkin).where(Checkin.deleted_at.is_(None))
+    query_team_a = initial_query.where(Checkin.team == TeamSide.TEAM_A).order_by(Checkin.queue_position.asc())
+    query_team_b = initial_query.where(Checkin.team == TeamSide.TEAM_B).order_by(Checkin.queue_position.asc())
+    query_waiting = initial_query.where(or_(Checkin.team == TeamSide.WAITING, Checkin.team.is_(None))).order_by(Checkin.queue_position.asc())
+    
+    checkins_team_a = db.scalars(query_team_a).all()
+    checkins_team_b = db.scalars(query_team_b).all()
+    checkins_waiting = db.scalars(query_waiting).all()
+ 
+    t_a = checkins_team_a[:7]
+    t_b = checkins_team_b[:7]
+    w_t_1 = checkins_waiting[0:7]
+    w_t_2 = checkins_waiting[7:14]
+    f_l = checkins_waiting[14:]
 
     if len(w_t_1 + w_t_2) >= 14:
         match_time_rule_text = "8 Minutos"
@@ -38,14 +44,13 @@ def get_current_match_state(db: Session) -> MatchStateResponse:
 
 def randomize_first_teams(db: Session):
 
-    current_match_state = get_current_match_state(db)
+    query = select(Checkin).where(Checkin.deleted_at.is_(None)).order_by(Checkin.arrival_time.asc())
+    checkins = db.scalars(query).all()
 
-    teams_checkins = current_match_state.team_a + current_match_state.team_b
+    random.shuffle(checkins)
 
-    random.shuffle(teams_checkins)
-
-    new_team_a = teams_checkins[:7]
-    new_team_b = teams_checkins[7:14]
+    new_team_a = checkins[:7]
+    new_team_b = checkins[7:14]
 
     ids_team_a = [c.id for c in new_team_a]
     ids_team_b = [c.id for c in new_team_b]
@@ -61,10 +66,12 @@ def randomize_first_teams(db: Session):
 
     for index, checkin in enumerate(real_checkins_team_a):
         checkin.queue_position = index + 1
+        checkin.team = "team_a"
         player_names_t_a.append(checkin.player.name)
 
     for index, checkin in enumerate(real_checkins_team_b):
         checkin.queue_position = index + 8
+        checkin.team = "team_b"
         player_names_t_b.append(checkin.player.name)
     
     audit_log_service.create_log(
@@ -83,47 +90,52 @@ def process_draw(db: Session, state: MatchStateResponse):
     
     teams_checkins = state.team_a + state.team_b
 
-    ids_to_update = [c.id for c in teams_checkins]
+    current_match_state = get_current_match_state(db)
 
-    real_checkins = db.scalars(select(Checkin).where(Checkin.id.in_(ids_to_update))).all()
+    wt1_checkins = current_match_state.waiting_team_1
+    wt2_checkins = current_match_state.waiting_team_2
 
-    real_checkins.sort(key=lambda x: x.arrival_time)
-
-    player_names = []
-
-    for index, checkin in enumerate(real_checkins):
-        checkin.queue_position = next_pos + index
-        player_names.append(checkin.player.name)
-    
-    audit_log_service.create_log(
-        db,
-        f"Empate (2 times fora). Rodaram todos: {', '.join(player_names)}"
-    )
+    update_checkin_team(db, teams_checkins, TeamSide.WAITING, True)
+    update_checkin_team(db, wt1_checkins, TeamSide.TEAM_A, False)
+    update_checkin_team(db, wt2_checkins, TeamSide.TEAM_B, False)
 
     db.commit()
 
     return get_current_match_state(db)
 
-
-def rotate_team(db: Session, team_checkins: List[Checkin]):
+def update_checkin_team(db: Session, team_checkins: List[Checkin], team: TeamSide, is_next_pos: bool = False):
+                
     next_pos = checkin_service.get_next_position(db)
 
     ids_to_update = [c.id for c in team_checkins]
 
     real_checkins = db.scalars(select(Checkin).where(Checkin.id.in_(ids_to_update))).all()
-
     real_checkins.sort(key=lambda x: x.arrival_time)
 
     player_names = []
 
     for index, checkin in enumerate(real_checkins):
-        checkin.queue_position = next_pos + index
+        
+        if is_next_pos == True:
+            checkin.queue_position = next_pos + index
+
+        checkin.team = team
+
         player_names.append(checkin.player.name)
     
     audit_log_service.create_log(
         db,
         f"Rodaram todos: {', '.join(player_names)}"
     )
+
+def rotate_team(db: Session, team_checkins: List[Checkin], team: TeamSide):
+
+    current_match_state = get_current_match_state(db)
+
+    wt1_checkins = current_match_state.waiting_team_1
+
+    update_checkin_team(db, team_checkins, TeamSide.WAITING, True)
+    update_checkin_team(db, wt1_checkins, team, False)
 
     db.commit()
 
@@ -134,9 +146,9 @@ def end_match(db: Session, match_result: MatchEndRequest):
     state = get_current_match_state(db)
 
     if match_result.result == MatchResultEnum.losing_team_a:
-        return rotate_team(db, state.team_a)
+        return rotate_team(db, state.team_a, TeamSide.TEAM_A)
     elif match_result.result == MatchResultEnum.losing_team_b:
-        return rotate_team(db, state.team_b)
+        return rotate_team(db, state.team_b, TeamSide.TEAM_B)
     elif match_result.result == MatchResultEnum.draw:
-        return process_draw(db, state)
+        return process_draw(db, state.team_a + state.team_b)
 
