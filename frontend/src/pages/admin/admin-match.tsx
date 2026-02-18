@@ -3,7 +3,7 @@ import RandomizeTeamsButton from "@/components/match/randomize_match_button";
 import MatchTable from "@/components/match/matches-table";
 
 import type { MatchResponse } from "@/types/match";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getMatch } from "@/services/match";
 
 export default function AdminMatch() {
@@ -19,10 +19,16 @@ export default function AdminMatch() {
         setMatchData(newMatches);
     };
 
+    useEffect(() => {
+        if (matchData === null) {
+            handleGetCheckin();
+        }
+    })
+
     return (
         <div className="flex flex-col p-4 gap-4 min-h-screen">
             <CheckinForm onSuccess={handleGetCheckin}/>
-            <RandomizeTeamsButton onMatchesListUpdate={handleUpdateMatchesList}/>
+            { matchData?.can_randomize == true ? <RandomizeTeamsButton onMatchesListUpdate={handleUpdateMatchesList}/> : <></>}
             <MatchTable matchTeamsList={matchData} fromAdminPage={true}/>
         </div>
     )

@@ -11,9 +11,10 @@ export default function RotateLoserTeamButton({onSuccess}: RotateLoserTeamButton
 
     async function handleRotateLoserTeam(result: string) {
         try {
-            rotateLoserTeam(result);
+            await rotateLoserTeam(result);
 
             if (onSuccess) {
+                console.log("chegou aqui!")
               onSuccess();
             };
 
@@ -32,13 +33,13 @@ export default function RotateLoserTeamButton({onSuccess}: RotateLoserTeamButton
                     </p></Button>
             </DropdownTrigger>
             <DropdownMenu aria-label="Dynamic Actions">
-                <DropdownItem key="deletar" endContent={<TrashIcon width={16} />} color="danger" onPress={() => handleRotateLoserTeam("team_a")}>
+                <DropdownItem key="deletar_team_a" endContent={<TrashIcon width={16} />} color="danger" onPress={() => handleRotateLoserTeam("team_a")}>
                     Time A
                 </DropdownItem>
-                <DropdownItem key="deletar" endContent={<TrashIcon width={16} />} color="danger" onPress={() => handleRotateLoserTeam("team_b")}>
+                <DropdownItem key="deletar_team_b" endContent={<TrashIcon width={16} />} color="danger" onPress={() => handleRotateLoserTeam("team_b")}>
                     Time B
                 </DropdownItem>
-                <DropdownItem key="deletar" endContent={<TrashIcon width={16} />} color="danger" onPress={() => handleRotateLoserTeam("draw")}>
+                <DropdownItem key="deletar_empate" endContent={<TrashIcon width={16} />} color="danger" onPress={() => handleRotateLoserTeam("draw")}>
                     Empate
                 </DropdownItem>
             </DropdownMenu>

@@ -23,28 +23,20 @@ export default function MatchTable({matchTeamsList, fromAdminPage}: MatchTablePr
         try {
             const response = await getMatch();
             setMatchData(response);
+
+            console.log(response)
         } catch (error) {
             console.error(error);
         }
     }
 
-    async function handleDeleteCheckin(teamList: keyof MatchResponse, checkinId: number) {
+    async function handleDeleteCheckin(checkinId: number) {
         try {
             await deleteCheckin(checkinId);
 
-            if (!matchData) return;
+            console.log("tentou setar")
 
-            const currentList = matchData[teamList];
-
-            if (Array.isArray(currentList)) {
-                const newTeamList = currentList.filter(item => item.id !== checkinId);
-                
-                setMatchData({
-                    ...matchData, [teamList]: newTeamList
-                });              
-            };
-
-            await handleGetCheckin();
+            await handleGetCheckin()
             
         } catch (error) {
             console.error(error); 
@@ -55,9 +47,9 @@ export default function MatchTable({matchTeamsList, fromAdminPage}: MatchTablePr
         if(matchTeamsList) {
             setMatchData(matchTeamsList);
         } else {
-            handleGetCheckin()
+            handleGetCheckin();
         }
-    }, [matchTeamsList, matchData])
+    }, [matchTeamsList])
 
     return (
         <div className="flex flex-col justify-top items-center w-full gap-6">
@@ -82,8 +74,7 @@ export default function MatchTable({matchTeamsList, fromAdminPage}: MatchTablePr
                                                 <Button fullWidth variant="light">{item.player.name}</Button>
                                             </DropdownTrigger>
                                             <DropdownMenu aria-label="Dynamic Actions">
-                                                <DropdownItem key="deletar" endContent={<TrashIcon width={16} />} color="danger" onPress={() => handleDeleteCheckin("team_a", item.id)}>
-                                                   Deletar
+                                                <DropdownItem key="deletar" endContent={<TrashIcon width={16} />} color="danger" onPress={() => handleDeleteCheckin(item.id)}>                                                   Deletar
                                                 </DropdownItem>
                                             </DropdownMenu>
                                         </Dropdown> :
@@ -113,7 +104,7 @@ export default function MatchTable({matchTeamsList, fromAdminPage}: MatchTablePr
                                                 <Button fullWidth variant="light">{item.player.name}</Button>
                                             </DropdownTrigger>
                                             <DropdownMenu aria-label="Dynamic Actions">
-                                                <DropdownItem key="deletar" endContent={<TrashIcon width={16} />} color="danger" onPress={() => handleDeleteCheckin("team_b", item.id)}>
+                                                <DropdownItem key="deletar" endContent={<TrashIcon width={16} />} color="danger" onPress={() => handleDeleteCheckin(item.id)}>
                                                     Deletar
                                                 </DropdownItem>
                                             </DropdownMenu>
@@ -151,7 +142,7 @@ export default function MatchTable({matchTeamsList, fromAdminPage}: MatchTablePr
                                                     <Button fullWidth variant="light">{item.player.name}</Button>
                                                 </DropdownTrigger>
                                                 <DropdownMenu aria-label="Dynamic Actions">
-                                                    <DropdownItem key="deletar" endContent={<TrashIcon width={16} />} color="danger" onPress={() => handleDeleteCheckin("waiting_team_1", item.id)}>
+                                                    <DropdownItem key="deletar" endContent={<TrashIcon width={16} />} color="danger" onPress={() => handleDeleteCheckin(item.id)}>
                                                     Deletar
                                                     </DropdownItem>
                                                 </DropdownMenu>
@@ -184,7 +175,7 @@ export default function MatchTable({matchTeamsList, fromAdminPage}: MatchTablePr
                                                     <Button fullWidth variant="light">{item.player.name}</Button>
                                                 </DropdownTrigger>
                                                 <DropdownMenu aria-label="Dynamic Actions">
-                                                    <DropdownItem key="deletar" endContent={<TrashIcon width={16} />} color="danger" onPress={() => handleDeleteCheckin("waiting_team_2", item.id)}>
+                                                    <DropdownItem key="deletar" endContent={<TrashIcon width={16} />} color="danger" onPress={() => handleDeleteCheckin(item.id)}>
                                                     Deletar
                                                     </DropdownItem>
                                                 </DropdownMenu>
@@ -217,7 +208,7 @@ export default function MatchTable({matchTeamsList, fromAdminPage}: MatchTablePr
                                                     <Button fullWidth variant="light">{item.player.name}</Button>
                                                 </DropdownTrigger>
                                                 <DropdownMenu aria-label="Dynamic Actions">
-                                                    <DropdownItem key="deletar" endContent={<TrashIcon width={16} />} color="danger" onPress={() => handleDeleteCheckin("following_list", item.id)}>
+                                                    <DropdownItem key="deletar" endContent={<TrashIcon width={16} />} color="danger" onPress={() => handleDeleteCheckin(item.id)}>
                                                     Deletar
                                                     </DropdownItem>
                                                 </DropdownMenu>

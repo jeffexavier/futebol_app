@@ -1,11 +1,11 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
-from sqlalchemy import select, func
+from sqlalchemy import select, func, or_
 from datetime import datetime
 
 from app.models.checkin import Checkin
 from app.models.player import Player
-from app.schemas.checkin import CheckinCreate, CheckinUpdate
+from app.schemas.checkin import TeamSide, CheckinCreate, CheckinUpdate
 from app.schemas.player import PlayerCreate
 from app.services import audit_log_service, player_service
 
@@ -115,9 +115,23 @@ def delete_checkin(db: Session, checkin_id: int):
     if not db_checkin or db_checkin.deleted_at is not None:
         return None
     
+    deleted_player_queue_pos = db_checkin.queue_position
+    deleted_player_team = db_checkin.team
+
+    next_pos = get_next_position(db)
+
     db_checkin.deleted_at = datetime.now()
-    
-    audit_log_service.create_log(db, f"Checkin ID = {checkin_id} deletado.")
+    db_checkin.queue_position = next_pos
+    db_checkin.team = TeamSide.WAITING
+
+    initial_query = select(Checkin).where(Checkin.deleted_at.is_(None))
+    query_waiting = initial_query.where(or_(Checkin.team == TeamSide.WAITING, Checkin.team.is_(None))).order_by(Checkin.queue_position.asc())
+    checkins_waiting = db.scalars(query_waiting).first()
+
+    checkins_waiting.queue_position = deleted_player_queue_pos
+    checkins_waiting.team = deleted_player_team
+
+    audit_log_service.create_log(db, f"Checkin do jogador {db_checkin.player.name} deletado com novo queue position = {db_checkin.queue_position} | Jogador {checkins_waiting.player.name} foi atualizado para o time = {db_checkin.team} e queue position = {deleted_player_queue_pos}")
 
     db.commit()
 
