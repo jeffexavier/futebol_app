@@ -30,6 +30,7 @@ origins = [
     "http://localhost:5173",    # Vite (React padrão)
     "http://localhost:3000",    # React Create App
     "http://127.0.0.1:5173",    # Às vezes o navegador usa IP
+    "http://187.77.42.89:8080/" # IP VPS  
     "http://localhost",         # Genérico
 ]
 
