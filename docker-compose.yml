@@ -1,12 +1,23 @@
 services:
-  api:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: futebol_app_api
+  backend:
+    build: ./backend
+    container_name: futebol_app_backend
+    restart: always
     ports:
       - "8000:8000"
     volumes:
-      - ./backend:/app
+      - ./db_data:/app/data
     environment:
-      - DATABASE_URL=sqlite:///./society.db
+      - DATABASE_URL=sqlite:///./data/society.db
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        - VITE_API_URL=http://localhost:8000
+        #- VITE_API_URL=http://187.77.42.89:8000
+    container_name: futebol_app_frontend
+    restart: always
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
