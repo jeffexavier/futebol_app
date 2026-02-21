@@ -27,10 +27,15 @@ def get_current_match_state(db: Session) -> MatchStateResponse:
     w_t_2 = checkins_waiting[7:14]
     f_l = checkins_waiting[14:]
 
-    if len(t_a + t_b) < 14:
+    if len(t_a + t_b) < 14 and len(t_a + t_b + w_t_1 + w_t_2) >= 14:
         can_randomize_rule = True
     else :
         can_randomize_rule = False
+
+    if len(w_t_1 + w_t_2) >= 14:
+        can_choose_draw_rule = True
+    else:
+        can_choose_draw_rule = False
 
     if len(w_t_1 + w_t_2) >= 14:
         match_time_rule_text = "8 Minutos"
@@ -44,6 +49,7 @@ def get_current_match_state(db: Session) -> MatchStateResponse:
         waiting_team_2 = w_t_2,
         following_list = f_l,
         can_randomize = can_randomize_rule,
+        can_choose_draw = can_choose_draw_rule,
         match_time_rule = match_time_rule_text
     )
 
@@ -55,41 +61,34 @@ def randomize_first_teams(db: Session):
     first_teams_checkins = checkins[0:14]
     random.shuffle(first_teams_checkins)
 
-    new_team_a = first_teams_checkins[:7]
-    new_team_b = first_teams_checkins[7:14]
+    new_teams = first_teams_checkins[:14]
     following_teams = checkins[14:]
-
-
-    ids_team_a = [c.id for c in new_team_a]
-    ids_team_b = [c.id for c in new_team_b]
-    ids_ft = [c.id for c in following_teams]
-
-    real_checkins_team_a = db.scalars(select(Checkin).where(Checkin.id.in_(ids_team_a))).all()
-    real_checkins_team_a.sort(key=lambda x: x.arrival_time)
-
-    real_checkins_team_b = db.scalars(select(Checkin).where(Checkin.id.in_(ids_team_b))).all()
-    real_checkins_team_b.sort(key=lambda x: x.arrival_time)
-
-    real_checkins_ft = db.scalars(select(Checkin).where(Checkin.id.in_(ids_ft))).all()
-    real_checkins_ft.sort(key=lambda x: x.arrival_time)
 
     player_names_t_a = []
     player_names_t_b = []
     player_names_ft = []
 
-    for index, checkin in enumerate(real_checkins_team_a):
+    for index, checkin in enumerate(new_teams):
         checkin.queue_position = index + 1
-        checkin.team = TeamSide.TEAM_A
-        player_names_t_a.append(checkin.player.name)
+        if index % 2 == 0:
+            checkin.team = TeamSide.TEAM_A
 
-    for index, checkin in enumerate(real_checkins_team_b):
-        checkin.queue_position = index + 8
-        checkin.team = TeamSide.TEAM_B
-        player_names_t_b.append(checkin.player.name)
+            player_names_t_a.append(checkin.player.name)
+        else:
+            checkin.team = TeamSide.TEAM_B
 
-    for index, checkin in enumerate(real_checkins_ft):
-        checkin.queue_position = index + 8
+            player_names_t_b.append(checkin.player.name)
+
+    # for index, checkin in enumerate(new_team_b):
+    #     checkin.queue_position = index + 8
+    #     checkin.team = TeamSide.TEAM_B
+
+    #     player_names_t_b.append(checkin.player.name)
+
+    for index, checkin in enumerate(following_teams):
+        checkin.queue_position = index + 15
         checkin.team = TeamSide.WAITING
+
         player_names_ft.append(checkin.player.name)
     
     audit_log_service.create_log(
@@ -126,33 +125,34 @@ def update_checkin_team(db: Session, team_checkins: List[Checkin], team: TeamSid
         f"Rodaram todos: {', '.join(player_names)}"
     )
 
+    db.commit()
+
 def process_draw(db: Session, state: MatchStateResponse):
     
     teams_checkins = state.team_a + state.team_b
+
+    update_checkin_team(db, teams_checkins, TeamSide.WAITING, True)
 
     current_match_state = get_current_match_state(db)
 
     wt1_checkins = current_match_state.waiting_team_1
     wt2_checkins = current_match_state.waiting_team_2
 
-    update_checkin_team(db, teams_checkins, TeamSide.WAITING, True)
     update_checkin_team(db, wt1_checkins, TeamSide.TEAM_A, False)
     update_checkin_team(db, wt2_checkins, TeamSide.TEAM_B, False)
-
-    db.commit()
 
     return get_current_match_state(db)
 
 def rotate_team(db: Session, team_checkins: List[Checkin], team: TeamSide):
 
+    
+    update_checkin_team(db, team_checkins, TeamSide.WAITING, True)
+
     current_match_state = get_current_match_state(db)
 
     wt1_checkins = current_match_state.waiting_team_1
 
-    update_checkin_team(db, team_checkins, TeamSide.WAITING, True)
     update_checkin_team(db, wt1_checkins, team, False)
-
-    db.commit()
 
     return get_current_match_state(db)
 

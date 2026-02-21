@@ -19,6 +19,7 @@ class MatchStateResponse(BaseModel):
     waiting_team_2: List[CheckinResponse]
     following_list: List[CheckinResponse]
     can_randomize: Optional[bool] = False
+    can_choose_draw: Optional[bool] = False
 
     match_time_rule: Optional[str] = None
 

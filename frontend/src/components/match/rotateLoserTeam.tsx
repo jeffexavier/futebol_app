@@ -4,20 +4,16 @@ import { TrashIcon, ArrowLongDownIcon } from "../icons";
 import { rotateLoserTeam } from "@/services/match";
 
 interface RotateLoserTeamButtonProps {
-    onSuccess?: () => void;   
+    onSuccess?: () => void;
+    can_choose_draw: boolean | null;   
 }
 
-export default function RotateLoserTeamButton({onSuccess}: RotateLoserTeamButtonProps) {
+export default function RotateLoserTeamButton({onSuccess, can_choose_draw}: RotateLoserTeamButtonProps) {
 
     async function handleRotateLoserTeam(result: string) {
         try {
             await rotateLoserTeam(result);
-
-            if (onSuccess) {
-                console.log("chegou aqui!")
-              onSuccess();
-            };
-
+            onSuccess?.();
         } catch (error) {
             console.log(error)
         }
@@ -39,9 +35,11 @@ export default function RotateLoserTeamButton({onSuccess}: RotateLoserTeamButton
                 <DropdownItem key="deletar_team_b" endContent={<TrashIcon width={16} />} color="danger" onPress={() => handleRotateLoserTeam("team_b")}>
                     Time B
                 </DropdownItem>
-                <DropdownItem key="deletar_empate" endContent={<TrashIcon width={16} />} color="danger" onPress={() => handleRotateLoserTeam("draw")}>
-                    Empate
-                </DropdownItem>
+                { can_choose_draw === true ?
+                    <DropdownItem key="deletar_empate" endContent={<TrashIcon width={16} />} color="danger" onPress={() => handleRotateLoserTeam("draw")}>
+                        Empate
+                    </DropdownItem> : <></>
+                }
             </DropdownMenu>
         </Dropdown>
     );

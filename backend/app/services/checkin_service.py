@@ -38,11 +38,12 @@ def create_checkin(db: Session, checkin_in: CheckinCreate):
                 detail="Erro ao criar jogador."
             )
 
-    existing_checkin = db.scalars(
-        select(Checkin).where(Checkin.player_id == db_player.id)
-    ).one_or_none()
+    active_checkin = db.query(Checkin).filter(
+        Checkin.player_id == db_player.id,
+        Checkin.deleted_at.is_(None) # Só procura os que não foram deletados
+    ).first()
 
-    if existing_checkin:
+    if active_checkin:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Jogador já está na fila!"
@@ -127,11 +128,17 @@ def delete_checkin(db: Session, checkin_id: int):
     initial_query = select(Checkin).where(Checkin.deleted_at.is_(None))
     query_waiting = initial_query.where(or_(Checkin.team == TeamSide.WAITING, Checkin.team.is_(None))).order_by(Checkin.queue_position.asc())
     checkins_waiting = db.scalars(query_waiting).first()
+   
+    log_text = f"Checkin do jogador {db_checkin.player.name} deletado com novo queue position = {db_checkin.queue_position}"
 
-    checkins_waiting.queue_position = deleted_player_queue_pos
-    checkins_waiting.team = deleted_player_team
+    if checkins_waiting:
+        checkins_waiting.queue_position = deleted_player_queue_pos
+        checkins_waiting.team = deleted_player_team
 
-    audit_log_service.create_log(db, f"Checkin do jogador {db_checkin.player.name} deletado com novo queue position = {db_checkin.queue_position} | Jogador {checkins_waiting.player.name} foi atualizado para o time = {db_checkin.team} e queue position = {deleted_player_queue_pos}")
+        log_text = log_text + f" | Jogador {checkins_waiting.player.name} foi atualizado para o time = {db_checkin.team} e queue position = {deleted_player_queue_pos}"
+
+
+    audit_log_service.create_log(db, log_text)
 
     db.commit()
 
