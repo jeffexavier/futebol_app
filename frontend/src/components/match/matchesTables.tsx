@@ -1,4 +1,3 @@
-import { getMatch } from "@/services/match";
 import { Alert } from "@heroui/alert";
 import { useEffect, useState } from "react";
 import type { MatchResponse } from "@/types/match";
@@ -8,7 +7,7 @@ import MatchTable from "./matchTable";
 interface MatchesTablesProps {
     matchTeamsList: MatchResponse | null;
     fromAdminPage: boolean | null;
-    onSuccess: () => Promise<void>;
+    onSuccess?: () => Promise<void>;
 };
 
 export default function MatchesTables({matchTeamsList, fromAdminPage, onSuccess}: MatchesTablesProps) {
