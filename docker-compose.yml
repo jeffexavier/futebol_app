@@ -13,8 +13,8 @@ services:
     build:
       context: ./frontend
       args:
-        - VITE_API_URL=http://localhost:8000
-        #- VITE_API_URL=http://187.77.42.89:8000
+        #- VITE_API_URL=http://localhost:8000
+        - VITE_API_URL=http://187.77.42.89:8000
     container_name: futebol_app_frontend
     restart: always
     ports:
