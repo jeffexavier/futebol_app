@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import CheckinForm from "@/components/checkin/checkin-form";
+import CheckinForm from "@/components/checkin/checkinForm";
 
 export default function Checkin(){
 

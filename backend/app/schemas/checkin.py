@@ -18,7 +18,7 @@ class CheckinCreate(PlayerCreate):
 
 class CheckinUpdate(BaseModel):
     deleted_at: Optional[datetime] = None
-    team: Optional[TeamSide] = None
+    team: Optional[TeamSide] = TeamSide.WAITING
 
 class CheckinResponse(BaseModel):
     id: int

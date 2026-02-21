@@ -2,7 +2,7 @@ import { Route, Routes } from "react-router-dom";
 
 import Checkin from "@/pages/checkin";
 import Match from "@/pages/match";
-import AdminMatch from "./pages/admin/admin-match";
+import AdminMatch from "./pages/admin/adminMatch";
 
 function App() {
   return (

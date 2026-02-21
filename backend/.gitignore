@@ -7,3 +7,7 @@ __pycache__/
 
 # Banco de dados
 *.db
+*.sqlite3
+
+# Pasta de volume do Docker
+db_data/

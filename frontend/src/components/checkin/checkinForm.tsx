@@ -25,9 +25,11 @@ export default function CheckinForm({onSuccess}: CheckinFormProps){
             
             setStatus({type: 'success', msg: `Bora! ${playerName} entrou na fila! ⚽`});
 
-            if (onSuccess) {
-              onSuccess();  
-            };
+            // if (onSuccess) {
+            //   onSuccess();  
+            // };
+
+            onSuccess?.(); //Mesma if de cima
 
             setPlayerName("");
         } catch (error) {
