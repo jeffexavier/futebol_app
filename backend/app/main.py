@@ -32,7 +32,6 @@ origins = [
     "http://127.0.0.1:5173",    # Às vezes o navegador usa IP
     "http://187.77.42.89",      # IP VPS
     "http://187.77.42.89:80",   # IP VPS FRONTEND PORTA INTERNA
-    "http://187.77.42.89:8080",# IP VPS FRONTEND
     "http://localhost",         # Genérico
 ]
 
