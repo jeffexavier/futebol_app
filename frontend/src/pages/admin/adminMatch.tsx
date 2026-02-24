@@ -5,7 +5,6 @@ import MatchesTables from "@/components/match/matchesTables";
 import type { MatchResponse } from "@/types/match";
 import { useEffect, useState } from "react";
 import { getMatch } from "@/services/match";
-import { Navbar } from "@/components/navbar";
 import AdminLayout from "@/layouts/admin";
 
 export default function AdminMatch() {
