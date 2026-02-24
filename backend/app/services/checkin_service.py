@@ -131,10 +131,10 @@ def delete_checkin(db: Session, checkin_id: int):
    
     log_text = f"Checkin do jogador {db_checkin.player.name} deletado com novo queue position = {db_checkin.queue_position}"
 
-    if checkins_waiting:
-        checkins_waiting.queue_position = deleted_player_queue_pos
-        checkins_waiting.team = deleted_player_team
 
+    if checkins_waiting and (deleted_player_team in (TeamSide.TEAM_A, TeamSide.TEAM_B)):
+        checkins_waiting.team = deleted_player_team
+        print("#------------------------------------------------------------- passou aqui")
         log_text = log_text + f" | Jogador {checkins_waiting.player.name} foi atualizado para o time = {db_checkin.team} e queue position = {deleted_player_queue_pos}"
 
 

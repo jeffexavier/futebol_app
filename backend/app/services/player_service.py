@@ -31,7 +31,7 @@ def create_player(db: Session, player_in: PlayerCreate):
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Erro interno ao crir jogador."
+            detail="Erro interno ao criar jogador."
         )
 
     return db_player
