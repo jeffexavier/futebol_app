@@ -5,58 +5,46 @@ export const siteConfig = {
   description: "Organização da pelada de quarta.",
   navItems: [
     {
-      label: "Home",
+      label: "Início",
+      permission: ["default"],
       href: "/",
     },
     {
-      label: "Docs",
-      href: "/docs",
+      label: "Jogadores",
+      permission: ["admin"],
+      href: "/admin/players",
     },
     {
-      label: "Pricing",
-      href: "/pricing",
+      label: "Partidas",
+      permission: ["admin"],
+      href: "/admin/matches",
     },
     {
-      label: "Blog",
-      href: "/blog",
-    },
-    {
-      label: "About",
-      href: "/about",
-    },
+      label: "Lista",
+      permission: ["default"],
+      href: "/matches",
+    },  
   ],
   navMenuItems: [
     {
-      label: "Profile",
-      href: "/profile",
+      label: "Início",
+      permission: ["default"],
+      href: "/",
     },
     {
-      label: "Dashboard",
-      href: "/dashboard",
+      label: "Jogadores",
+      permission: ["admin"],
+      href: "/admin/players",
     },
     {
-      label: "Projects",
-      href: "/projects",
+      label: "Partidas",
+      permission: ["admin"],
+      href: "/admin/matches",
     },
     {
-      label: "Team",
-      href: "/team",
-    },
-    {
-      label: "Calendar",
-      href: "/calendar",
-    },
-    {
-      label: "Settings",
-      href: "/settings",
-    },
-    {
-      label: "Help & Feedback",
-      href: "/help-feedback",
-    },
-    {
-      label: "Logout",
-      href: "/logout",
+      label: "Lista",
+      permission: ["default"],
+      href: "/matches",
     },
   ],
   links: {

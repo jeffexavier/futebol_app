@@ -14,9 +14,9 @@ export async function randomizeTeams() {
     };
 };
 
-export async function rotateLoserTeam(result: string) {
+export async function rotateLoserTeam(result: string, coin_winner_team: string | null) {
     try {
-        const response = await api.post('/matches', {result});
+        const response = await api.post('/matches', {result, coin_winner_team});
         return response.data
     } catch (error) {
         console.error(error);

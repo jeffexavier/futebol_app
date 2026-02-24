@@ -11,6 +11,7 @@ class MatchResultEnum(str, Enum):
 
 class MatchEndRequest(BaseModel):
     result: MatchResultEnum
+    coin_winner_team: Optional[MatchResultEnum] = None
 
 class MatchStateResponse(BaseModel):
     team_a: List[CheckinResponse]

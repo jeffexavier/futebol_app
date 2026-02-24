@@ -5,6 +5,8 @@ import MatchesTables from "@/components/match/matchesTables";
 import type { MatchResponse } from "@/types/match";
 import { useEffect, useState } from "react";
 import { getMatch } from "@/services/match";
+import { Navbar } from "@/components/navbar";
+import AdminLayout from "@/layouts/admin";
 
 export default function AdminMatch() {
 
@@ -27,10 +29,12 @@ export default function AdminMatch() {
     })
 
     return (
+    <AdminLayout>
         <div className="flex flex-col p-4 gap-4 min-h-screen">
             <CheckinForm onSuccess={handleGetCheckin}/>
             { matchData?.can_randomize === true ? <RandomizeTeamsButton onMatchesListUpdate={handleUpdateMatchesList}/> : <></>}
             <MatchesTables matchTeamsList={matchData} fromAdminPage={true} onSuccess={handleGetCheckin}/>
         </div>
+    </AdminLayout>
     )
 }

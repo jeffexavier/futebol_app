@@ -79,12 +79,6 @@ def randomize_first_teams(db: Session):
 
             player_names_t_b.append(checkin.player.name)
 
-    # for index, checkin in enumerate(new_team_b):
-    #     checkin.queue_position = index + 8
-    #     checkin.team = TeamSide.TEAM_B
-
-    #     player_names_t_b.append(checkin.player.name)
-
     for index, checkin in enumerate(following_teams):
         checkin.queue_position = index + 15
         checkin.team = TeamSide.WAITING
@@ -127,11 +121,16 @@ def update_checkin_team(db: Session, team_checkins: List[Checkin], team: TeamSid
 
     db.commit()
 
-def process_draw(db: Session, state: MatchStateResponse):
-    
-    teams_checkins = state.team_a + state.team_b
+def process_draw(db: Session, state: MatchStateResponse, coin_winner_team: MatchEndRequest = None):
 
-    update_checkin_team(db, teams_checkins, TeamSide.WAITING, True)
+    if coin_winner_team == TeamSide.TEAM_B:
+        print("#------------------------------------------------------ Azul")
+        update_checkin_team(db, state.team_b, TeamSide.WAITING, True)
+        update_checkin_team(db, state.team_a, TeamSide.WAITING, True)
+    else:
+        print("#------------------------------------------------------ Amarelo | NÂO informado!")
+        update_checkin_team(db, state.team_a, TeamSide.WAITING, True)
+        update_checkin_team(db, state.team_b, TeamSide.WAITING, True)
 
     current_match_state = get_current_match_state(db)
 
@@ -145,7 +144,6 @@ def process_draw(db: Session, state: MatchStateResponse):
 
 def rotate_team(db: Session, team_checkins: List[Checkin], team: TeamSide):
 
-    
     update_checkin_team(db, team_checkins, TeamSide.WAITING, True)
 
     current_match_state = get_current_match_state(db)
@@ -165,5 +163,5 @@ def end_match(db: Session, match_result: MatchEndRequest):
     elif match_result.result == MatchResultEnum.losing_team_b:
         return rotate_team(db, state.team_b, TeamSide.TEAM_B)
     elif match_result.result == MatchResultEnum.draw:
-        return process_draw(db, state)
+        return process_draw(db, state, match_result.coin_winner_team)
 
