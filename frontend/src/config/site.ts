@@ -23,7 +23,7 @@ export const siteConfig = {
       label: "Lista",
       permission: ["default"],
       href: "/matches",
-    },  
+    },
   ],
   navMenuItems: [
     {

@@ -1,24 +1,30 @@
 import api from "./api";
 
-export async function getMatch(){
-    const response = await api.get('/matches');
-    return response.data;
-};
+export async function getMatch() {
+  const response = await api.get("/matches");
+
+  return response.data;
+}
 
 export async function randomizeTeams() {
-    try {
-        const response = await api.post('/matches/randomize');
-        return response.data;
-    } catch (error) {
-        console.error(error);
-    };
-};
+  try {
+    const response = await api.post("/matches/randomize");
 
-export async function rotateLoserTeam(result: string, coin_winner_team: string | null) {
-    try {
-        const response = await api.post('/matches', {result, coin_winner_team});
-        return response.data
-    } catch (error) {
-        console.error(error);
-    };
-};
+    return response.data;
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+export async function rotateLoserTeam(
+  result: string,
+  coin_winner_team: string | null,
+) {
+  try {
+    const response = await api.post("/matches", { result, coin_winner_team });
+
+    return response.data;
+  } catch (error) {
+    console.error(error);
+  }
+}
