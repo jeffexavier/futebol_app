@@ -1,39 +1,48 @@
+import type { MatchResponse } from "@/types/match";
+
+import { useEffect, useState } from "react";
+
 import CheckinForm from "@/components/checkin/checkinForm";
 import RandomizeTeamsButton from "@/components/match/randomizeMatchButton";
 import MatchesTables from "@/components/match/matchesTables";
-
-import type { MatchResponse } from "@/types/match";
-import { useEffect, useState } from "react";
 import { getMatch } from "@/services/match";
 import AdminLayout from "@/layouts/admin";
 
 export default function AdminMatch() {
+  const [matchData, setMatchData] = useState<MatchResponse | null>(null);
 
-    const [matchData, setMatchData] = useState<MatchResponse | null>(null)
+  async function handleGetCheckin() {
+    const matchTeamsList = await getMatch();
 
-    async function handleGetCheckin() {
-        const matchTeamsList = await getMatch();
-        setMatchData(matchTeamsList)
-        console.log(matchTeamsList)
+    setMatchData(matchTeamsList);
+    console.log(matchTeamsList);
+  }
+
+  function handleUpdateMatchesList(newMatches: MatchResponse) {
+    setMatchData(newMatches);
+  }
+
+  useEffect(() => {
+    if (matchData === null) {
+      handleGetCheckin();
     }
+  });
 
-    function handleUpdateMatchesList(newMatches: MatchResponse) {
-        setMatchData(newMatches);
-    };
-
-    useEffect(() => {
-        if (matchData === null) {
-            handleGetCheckin();
-        }
-    })
-
-    return (
+  return (
     <AdminLayout>
-        <div className="flex flex-col p-4 gap-4 min-h-screen">
-            <CheckinForm onSuccess={handleGetCheckin}/>
-            { matchData?.can_randomize === true ? <RandomizeTeamsButton onMatchesListUpdate={handleUpdateMatchesList}/> : <></>}
-            <MatchesTables matchTeamsList={matchData} fromAdminPage={true} onSuccess={handleGetCheckin}/>
-        </div>
+      <div className="flex flex-col p-4 gap-4 min-h-screen">
+        <CheckinForm onSuccess={handleGetCheckin} />
+        {matchData?.can_randomize === true ? (
+          <RandomizeTeamsButton onMatchesListUpdate={handleUpdateMatchesList} />
+        ) : (
+          <></>
+        )}
+        <MatchesTables
+          fromAdminPage={true}
+          matchTeamsList={matchData}
+          onSuccess={handleGetCheckin}
+        />
+      </div>
     </AdminLayout>
-    )
+  );
 }
