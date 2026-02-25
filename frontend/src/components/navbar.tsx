@@ -22,6 +22,8 @@ interface NavbarProps {
 }
 
 export default function Navbar({fromAdminPage}: NavbarProps) {
+
+  console.log("#---------------------------------------------------------------------- ", fromAdminPage)
   return (
     <HeroUINavbar maxWidth="xl" position="sticky">
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
@@ -36,9 +38,10 @@ export default function Navbar({fromAdminPage}: NavbarProps) {
           </Link>
         </NavbarBrand>
         <div className="hidden lg:flex gap-4 justify-start ml-2">
-          {siteConfig.navItems.map((item) => (
+          {fromAdminPage ?
+          siteConfig.navItems.map((item) => (
             <NavbarItem key={item.href}>
-              {item.permission.includes("admin") ? (
+              {item.permission.includes("admin") && (
                 <Link
                   className={clsx(
                     linkStyles({ color: "foreground" }),
@@ -49,9 +52,24 @@ export default function Navbar({fromAdminPage}: NavbarProps) {
                 >
                   {item.label}
                 </Link>
-              ) : (<></>)}
+              )}
             </NavbarItem>
-          ))}
+          )) : siteConfig.navItems.map((item) => 
+            <NavbarItem key={item.href}>
+              {item.permission.includes("default")  && (
+                <Link
+                  className={clsx(
+                    linkStyles({ color: "foreground" }),
+                    "data-[active=true]:text-primary data-[active=true]:font-medium",
+                  )}
+                  color="foreground"
+                  href={item.href}
+                >
+                  {item.label}
+                </Link>
+              )}
+            </NavbarItem>
+          )}
         </div>
       </NavbarContent>
 
@@ -75,27 +93,24 @@ export default function Navbar({fromAdminPage}: NavbarProps) {
 
       <NavbarMenu className="dark">
         <div className="mx-4 mt-2 flex flex-col gap-2">
-          {fromAdminPage === true ? 
+          {fromAdminPage ? 
             siteConfig.navMenuItems.map((item, index) =>
               <NavbarMenuItem key={`${item}-${index}`}>
                 {item.permission.includes("admin") ? (
                     <Link color="foreground" href={item.href} size="lg">
                       {item.label}
                     </Link>
-                  ) : (
-                    <></>
-                  )}
-              </NavbarMenuItem>
-            
+                  ) : null }
+              </NavbarMenuItem> 
           ) : siteConfig.navMenuItems.map((item, index) =>
               <NavbarMenuItem key={`${item}-${index}`}>
                 {item.permission.includes("default") ? (
                     <Link color="foreground" href={item.href} size="lg">
                       {item.label}
                     </Link>
-                  ) : (
-                    <></>
-                  )}
+                  ) :
+                    null
+                  }
               </NavbarMenuItem>
           )}
         </div>

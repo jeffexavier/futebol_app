@@ -10,6 +10,11 @@ export const siteConfig = {
       href: "/",
     },
     {
+      label: "Lista",
+      permission: ["default"],
+      href: "/matches",
+    },
+    {
       label: "Jogadores",
       permission: ["admin"],
       href: "/admin/players",
@@ -18,11 +23,6 @@ export const siteConfig = {
       label: "Partidas",
       permission: ["admin"],
       href: "/admin/matches",
-    },
-    {
-      label: "Lista",
-      permission: ["default"],
-      href: "/matches",
     },
   ],
   navMenuItems: [
@@ -32,6 +32,11 @@ export const siteConfig = {
       href: "/",
     },
     {
+      label: "Lista",
+      permission: ["default"],
+      href: "/matches",
+    },
+    {
       label: "Jogadores",
       permission: ["admin"],
       href: "/admin/players",
@@ -40,11 +45,6 @@ export const siteConfig = {
       label: "Partidas",
       permission: ["admin"],
       href: "/admin/matches",
-    },
-    {
-      label: "Lista",
-      permission: ["default"],
-      href: "/matches",
     },
   ],
   links: {
