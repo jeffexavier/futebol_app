@@ -5,3 +5,8 @@ export interface Player {
   created_at: string;
   updated_at: string;
 }
+
+export interface UpdatePlayer {
+  name: string | null;
+  has_paid_monthly_fee: boolean | null;
+}

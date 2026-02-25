@@ -2,7 +2,7 @@ import { Route, Routes } from "react-router-dom";
 
 import Checkin from "@/pages/checkin";
 import Match from "@/pages/match";
-import Player from "./pages/player";
+import AdminPlayer from "./pages/admin/adminPlayer";
 import AdminMatch from "./pages/admin/adminMatch";
 
 
@@ -11,7 +11,7 @@ function App() {
     <Routes>
       <Route element={<Checkin />} path="/" />
       <Route element={<Match />} path="/matches" />
-      <Route element={<Player />} path="/players" />
+      <Route element={<AdminPlayer />} path="/admin/players" />
       <Route element={<AdminMatch />} path="/admin/matches" />
     </Routes>
   );

@@ -9,7 +9,7 @@ interface LayoutProps {
 
 export default function Layout({ children, fromAdminPage }: LayoutProps) {
   return (
-    <div className="relative flex flex-col h-full">
+    <div className="relative flex flex-col min-h-screen">
       <Navbar fromAdminPage={fromAdminPage}/>
       <main className="container mx-auto max-w-7xl px-6 flex-grow pt-2
 
