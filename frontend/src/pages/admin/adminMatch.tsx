@@ -29,7 +29,7 @@ export default function AdminMatch() {
   });
 
   return (
-    <AdminLayout>
+    <AdminLayout fromAdminPage={true}>
       <div className="flex flex-col p-4 gap-4 min-h-screen">
         <CheckinForm onSuccess={handleGetCheckin} />
         {matchData?.can_randomize === true ? (
