@@ -61,28 +61,40 @@ def randomize_first_teams(db: Session):
     first_teams_checkins = checkins[0:14]
     random.shuffle(first_teams_checkins)
 
-    new_teams = first_teams_checkins[:14]
+    new_team_a = first_teams_checkins[:7]
+    new_team_b = first_teams_checkins[7:14]
     following_teams = checkins[14:]
+
+    ids_team_a = [c.id for c in new_team_a]
+    ids_team_b = [c.id for c in new_team_b]
+    ids_ft = [c.id for c in following_teams]
+
+    real_checkins_team_a = db.scalars(select(Checkin).where(Checkin.id.in_(ids_team_a))).all()
+    real_checkins_team_a.sort(key=lambda x: x.arrival_time)
+
+    real_checkins_team_b = db.scalars(select(Checkin).where(Checkin.id.in_(ids_team_b))).all()
+    real_checkins_team_b.sort(key=lambda x: x.arrival_time)
+
+    real_checkins_ft = db.scalars(select(Checkin).where(Checkin.id.in_(ids_ft))).all()
+    real_checkins_ft.sort(key=lambda x: x.arrival_time)
 
     player_names_t_a = []
     player_names_t_b = []
     player_names_ft = []
 
-    for index, checkin in enumerate(new_teams):
+    for index, checkin in enumerate(real_checkins_team_a):
         checkin.queue_position = index + 1
-        if index % 2 == 0:
-            checkin.team = TeamSide.TEAM_A
+        checkin.team = TeamSide.TEAM_A
+        player_names_t_a.append(checkin.player.name)
 
-            player_names_t_a.append(checkin.player.name)
-        else:
-            checkin.team = TeamSide.TEAM_B
+    for index, checkin in enumerate(real_checkins_team_b):
+        checkin.queue_position = index + 8
+        checkin.team = TeamSide.TEAM_B
+        player_names_t_b.append(checkin.player.name)
 
-            player_names_t_b.append(checkin.player.name)
-
-    for index, checkin in enumerate(following_teams):
-        checkin.queue_position = index + 15
+    for index, checkin in enumerate(real_checkins_ft):
+        checkin.queue_position = index + 8
         checkin.team = TeamSide.WAITING
-
         player_names_ft.append(checkin.player.name)
     
     audit_log_service.create_log(
