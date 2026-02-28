@@ -17,7 +17,7 @@ import {
 import { useState } from "react";
 import { Select, SelectItem } from "@heroui/select";
 
-import { PencilSquareIcon, TrashIcon } from "../icons";
+import { PencilSquareIcon, TrashIcon, ArrowsUpDownIcon } from "../icons";
 
 import { updateCheckin, deleteCheckin } from "@/services/checkin";
 
@@ -25,6 +25,7 @@ interface ActionButtonsProps {
   fromAdminPage: boolean | null;
   checkinItem: CheckinItem;
   onSuccess?: () => void;
+  setOnMoveItem?: () => void;
 }
 
 export default function ActionButtons({
@@ -39,6 +40,7 @@ export default function ActionButtons({
     try {
       await updateCheckin(checkinId, team);
       onSuccess?.();
+      setIsOpen(false);
     } catch (error) {
       console.error(error);
     }
@@ -48,12 +50,13 @@ export default function ActionButtons({
     try {
       await deleteCheckin(checkinId);
       onSuccess?.();
+      setIsOpen(false);
     } catch (error) {
       console.error(error);
     }
   }
 
-  function handleOpenMOdal() {
+  function handleOpenModal() {
     setTimeout(() => {
       setIsOpen(true);
     }, 0);
@@ -88,10 +91,21 @@ export default function ActionButtons({
             key="atualizar"
             color="warning"
             endContent={<PencilSquareIcon width={16} />}
-            onPress={handleOpenMOdal}
+            onPress={handleOpenModal}
           >
             Atualizar
           </DropdownItem>
+          {
+          true &&
+          <DropdownItem
+            key="mudar posição"
+            color="primary"
+            endContent={<ArrowsUpDownIcon width={16} />}
+            onPress={handleOpenModal}
+          >
+            Mudar posição
+          </DropdownItem>
+          }
         </DropdownMenu>
       </Dropdown>
       <Modal

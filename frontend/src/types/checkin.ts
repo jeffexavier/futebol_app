@@ -4,7 +4,8 @@ export interface CheckinItem {
   id: number;
   player_id: number;
   queue_position: number;
+  team: string | null;
   arrival_time: string;
-  deleted_at: string | null; // Pode ser null
-  player: Player; // <--- Aqui a mágica: aninhamos a interface Player
+  deleted_at: string | null;
+  player: Player;
 }

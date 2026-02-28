@@ -94,7 +94,7 @@ export default function Navbar({fromAdminPage}: NavbarProps) {
       <NavbarMenu className="dark">
         <div className="mx-4 mt-2 flex flex-col gap-2">
           {fromAdminPage ? 
-            siteConfig.navMenuItems.map((item, index) =>
+            siteConfig.navItems.map((item, index) =>
               <NavbarMenuItem key={`${item}-${index}`}>
                 {item.permission.includes("admin") ? (
                     <Link color="foreground" href={item.href} size="lg">
@@ -102,7 +102,7 @@ export default function Navbar({fromAdminPage}: NavbarProps) {
                     </Link>
                   ) : null }
               </NavbarMenuItem> 
-          ) : siteConfig.navMenuItems.map((item, index) =>
+          ) : siteConfig.navItems.map((item, index) =>
               <NavbarMenuItem key={`${item}-${index}`}>
                 {item.permission.includes("default") ? (
                     <Link color="foreground" href={item.href} size="lg">

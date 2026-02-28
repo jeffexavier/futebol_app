@@ -15,8 +15,8 @@ def create_checkin_route(checkin_in: CheckinCreate, db: Session = Depends(get_db
     return checkin_service.create_checkin(db = db, checkin_in = checkin_in)
 
 @router.get("/", response_model=List[CheckinResponse], status_code=status.HTTP_200_OK)
-def get_checkins_route(db:Session = Depends(get_db), only_active: bool = None, limit: int = 10):
-    return checkin_service.get_checkins(db=db, only_active=only_active, limit=limit)
+def get_checkins_route(db:Session = Depends(get_db), active: bool = None, limit: int = 10):
+    return checkin_service.get_checkins(db, active, limit)
 
 @router.get("/{id}", response_model=CheckinResponse, status_code=status.HTTP_200_OK)
 def get_checkin_route(id, db: Session = Depends(get_db)):

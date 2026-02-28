@@ -67,14 +67,14 @@ def create_checkin(db: Session, checkin_in: CheckinCreate):
 
     return db_checkin
  
-def get_checkins(db: Session, only_active: bool = None, limit: int = 100):
+def get_checkins(db: Session, active: bool = None, limit: int = 100):
     
     query = select(Checkin)
 
-    if only_active != None:
-        if only_active == True:
+    if active != None:
+        if active == True:
             query = query.where(Checkin.deleted_at == None)
-        elif only_active == False:
+        elif active == False:
             query = query.where(Checkin.deleted_at != None)
 
     query = query.limit(limit)

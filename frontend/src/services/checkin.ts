@@ -6,6 +6,19 @@ export async function createCheckin(name: string) {
   return response.data;
 }
 
+export async function getCheckins(active: boolean | null, limit: number | null) {
+
+  const params = new URLSearchParams();
+
+  active && params.append("active", String(active));
+  params.append("limit", String(limit));
+
+  const response = await api.get("/checkins", {params})
+
+  return response.data;
+
+}
+
 export async function deleteCheckin(id: number) {
   const response = await api.delete(`/checkins/${id}`);
 
