@@ -80,14 +80,6 @@ export default function ActionButtons({
         </DropdownTrigger>
         <DropdownMenu aria-label="Ações do Jogador">
           <DropdownItem
-            key="deletar"
-            color="danger"
-            endContent={<TrashIcon width={16} />}
-            onPress={() => handleDeleteCheckin(checkinItem.id)}
-          >
-            Deletar
-          </DropdownItem>
-          <DropdownItem
             key="atualizar"
             color="warning"
             endContent={<PencilSquareIcon width={16} />}
@@ -106,6 +98,15 @@ export default function ActionButtons({
             Mudar posição
           </DropdownItem>
           }
+          <DropdownItem
+            key="deletar"
+            className="text-danger"
+            color="danger"
+            endContent={<TrashIcon width={16} />}
+            onPress={() => handleDeleteCheckin(checkinItem.id)}
+          >
+            Deletar
+          </DropdownItem>
         </DropdownMenu>
       </Dropdown>
       <Modal

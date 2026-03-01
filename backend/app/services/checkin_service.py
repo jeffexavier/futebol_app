@@ -12,7 +12,7 @@ from app.services import audit_log_service, player_service
 
 def get_next_position(db:Session) -> int:
     max_pos = db.query(func.max(Checkin.queue_position)).scalar()
-    return(max_pos or 0) + 1
+    return(max_pos or Decimal('0')) + Decimal('1')
 
 def create_checkin(db: Session, checkin_in: CheckinCreate):
     player_name = checkin_in.name.strip().title()
@@ -96,7 +96,10 @@ def update_checkin(db: Session, checkin_id: int, checkin_up: CheckinUpdate):
     db_checkin = db.get(Checkin, checkin_id)
 
     if not db_checkin:
-        return None
+        raise HTTPException (
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Checkin não encontrado!"
+        )
 
     update_data = checkin_up.model_dump(exclude_unset=True)
 
@@ -114,49 +117,71 @@ def update_checkin(db: Session, checkin_id: int, checkin_up: CheckinUpdate):
 
 def update_checkin_position(db: Session, checkin_id: int, checkin_up_pos: CheckinUpdatePosition):
 
-    checkin_db = db.query(Checkin).filter(Checkin.id == checkin_id).first()
-    if not checkin_db:
+    db_checkin = db.get(Checkin, checkin_id)
+    if not db_checkin:
         raise HTTPException (
             status_code = status.HTTP_404_NOT_FOUND,
-            detail = ""
+            detail = "Checkin não encontrado!"
         )
-    
-    before_pos = None
-    if checkin_up_pos.before_checkin_id :
-        before_checkin = db.query(Checkin).filter(Checkin.id == checkin_up_pos.checkin_id).first()
-        if before_checkin:
-            before_pos = after_checkin.queue_position
-        else:
-            raise HTTPException (
-                status_code = status.HTTP_404_NOT_FOUND,
-                detail = "Checkin do jogador da posição anterior não encontrado!"
-            )
 
+    before_pos = None
     after_pos = None
-    if checkin_up_pos.after_checkin_id :
-        after_checkin = db.query(Checkin).filter(Checkin.id == checkin_up_pos.checkin_id).first()
+
+    if checkin_up_pos.before_checkin_id is not None:
+        before_checkin = db.query(Checkin).filter(Checkin.id == checkin_up_pos.before_checkin_id).first()
+        if before_checkin:
+            before_pos = before_checkin.queue_position
+    
+    if checkin_up_pos.after_checkin_id is not None:
+        after_checkin = db.query(Checkin).filter(Checkin.id == checkin_up_pos.after_checkin_id).first()
         if after_checkin:
             after_pos = after_checkin.queue_position
+
+    new_position = None
+
+    if before_pos is not None:
+        next_pos_checkin = db.query(
+            Checkin
+        ).filter(
+            Checkin.queue_position > before_pos
+        ).order_by(
+            Checkin.queue_position.asc()
+        ).first()
+
+        if next_pos_checkin:
+            new_position = (before_pos + next_pos_checkin.queue_position) / Decimal('2')
         else:
-            raise HTTPException (
-                status_code = status.HTTP_404_NOT_FOUND,
-                detail = "Checkin do jogador da posição posterior não encontrado!"
-            )
+            new_position = get_next_position(db)
+    elif after_pos is not None:
+        prev_pos_checkin = db.query(
+            Checkin
+        ).filter(
+            Checkin.queue_position < after_pos
+        ).order_by(
+            Checkin.queue_position.desc()
+        ).first()
 
-    new_position = Decimal('0')
+        if prev_pos_checkin:
+            new_position = (after_pos + prev_pos_checkin.queue_position) / Decimal('2')
+        else:
+            new_position = after_pos / Decimal('2')
+    else:
+        raise HTTPException (
+            status_code = status.HTTP_404_NOT_FOUND,
+            detail = "Nenhum checkin anterior ou posterior encontrado! Nenhuma mudança foi realizada!"
+        )
 
-    if before_pos is not None and after_pos is not None:
-        new_position = (before_pos + after_pos) / Decimal("2")
-    elif before_pos is not None and after_pos is None:
-        pass
+    if new_position is not None:
+        db_checkin.queue_position = new_position
 
+    if checkin_up_pos.team:
+        db_checkin.team = checkin_up_pos.team
 
+    db.commit()
 
-    print("#--------------------------------", checkin_id, checkin_up_pos)
+    db.refresh(db_checkin)
 
-
-
-    return checkin_db
+    return db_checkin
 
 def delete_checkin(db: Session, checkin_id: int):
 

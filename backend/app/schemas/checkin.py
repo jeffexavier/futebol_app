@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import Optional
 from enum import Enum
+from decimal import Decimal
 from datetime import datetime
 
 from app.schemas.player import PlayerCreate, PlayerResponse
@@ -21,14 +22,15 @@ class CheckinUpdate(BaseModel):
     team: Optional[TeamSide] = TeamSide.WAITING
 
 class CheckinUpdatePosition(BaseModel):
-    before_checkin_id: Optional[int] = None
-    after_checkin_id: Optional[int] = None
+    before_checkin_id: Optional[Decimal] = None
+    after_checkin_id: Optional[Decimal] = None
+    team: Optional[TeamSide] = None
 
 class CheckinResponse(BaseModel):
     id: int
     player_id: int
     arrival_time: datetime
-    queue_position: int
+    queue_position: Decimal
     team: Optional[TeamSide]
     deleted_at: Optional[datetime]
     player: PlayerResponse
