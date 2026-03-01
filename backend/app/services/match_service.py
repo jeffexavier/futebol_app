@@ -93,7 +93,7 @@ def randomize_first_teams(db: Session):
         player_names_t_b.append(checkin.player.name)
 
     for index, checkin in enumerate(real_checkins_ft):
-        checkin.queue_position = index + 8
+        checkin.queue_position = index + 15
         checkin.team = TeamSide.WAITING
         player_names_ft.append(checkin.player.name)
     
