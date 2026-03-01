@@ -20,6 +20,10 @@ class CheckinUpdate(BaseModel):
     deleted_at: Optional[datetime] = None
     team: Optional[TeamSide] = TeamSide.WAITING
 
+class CheckinUpdatePosition(BaseModel):
+    before_checkin_id: Optional[int] = None
+    after_checkin_id: Optional[int] = None
+
 class CheckinResponse(BaseModel):
     id: int
     player_id: int

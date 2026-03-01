@@ -2,10 +2,11 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import select, func, or_
 from datetime import datetime
+from decimal import Decimal
 
 from app.models.checkin import Checkin
 from app.models.player import Player
-from app.schemas.checkin import TeamSide, CheckinCreate, CheckinUpdate
+from app.schemas.checkin import TeamSide, CheckinCreate, CheckinUpdate, CheckinUpdatePosition
 from app.schemas.player import PlayerCreate
 from app.services import audit_log_service, player_service
 
@@ -79,6 +80,8 @@ def get_checkins(db: Session, active: bool = None, limit: int = 100):
 
     query = query.limit(limit)
 
+    query = query.order_by(Checkin.queue_position.asc());
+
     result = db.scalars(query)
 
     return result.all()
@@ -108,6 +111,52 @@ def update_checkin(db: Session, checkin_id: int, checkin_up: CheckinUpdate):
     db.refresh(db_checkin)
 
     return db_checkin
+
+def update_checkin_position(db: Session, checkin_id: int, checkin_up_pos: CheckinUpdatePosition):
+
+    checkin_db = db.query(Checkin).filter(Checkin.id == checkin_id).first()
+    if not checkin_db:
+        raise HTTPException (
+            status_code = status.HTTP_404_NOT_FOUND,
+            detail = ""
+        )
+    
+    before_pos = None
+    if checkin_up_pos.before_checkin_id :
+        before_checkin = db.query(Checkin).filter(Checkin.id == checkin_up_pos.checkin_id).first()
+        if before_checkin:
+            before_pos = after_checkin.queue_position
+        else:
+            raise HTTPException (
+                status_code = status.HTTP_404_NOT_FOUND,
+                detail = "Checkin do jogador da posição anterior não encontrado!"
+            )
+
+    after_pos = None
+    if checkin_up_pos.after_checkin_id :
+        after_checkin = db.query(Checkin).filter(Checkin.id == checkin_up_pos.checkin_id).first()
+        if after_checkin:
+            after_pos = after_checkin.queue_position
+        else:
+            raise HTTPException (
+                status_code = status.HTTP_404_NOT_FOUND,
+                detail = "Checkin do jogador da posição posterior não encontrado!"
+            )
+
+    new_position = Decimal('0')
+
+    if before_pos is not None and after_pos is not None:
+        new_position = (before_pos + after_pos) / Decimal("2")
+    elif before_pos is not None and after_pos is None:
+        pass
+
+
+
+    print("#--------------------------------", checkin_id, checkin_up_pos)
+
+
+
+    return checkin_db
 
 def delete_checkin(db: Session, checkin_id: int):
 
