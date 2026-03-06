@@ -59,7 +59,7 @@ export default function MatchTable({
       >
         <Fragment>
           { onMoveItem && teamData && teamData.length > 0 &&
-            <TableRow className="dark cursor-pointer h-12 bg-foreground-100" key={`${teamData[0].id}, firstEmptySpace`} onClick={() => handleChooseNewPosition?.(teamData[0].id, PositionChoice.Before, chosenTeam)}>
+            <TableRow className="dark cursor-pointer h-12 bg-foreground-100" key={`${teamData[0].id}, firstEmptySpace`} onClick={() => handleChooseNewPosition?.(teamData[0].id, PositionChoice.After, chosenTeam)}>
               <TableCell>
                 {""}
               </TableCell>
