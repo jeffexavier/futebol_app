@@ -46,8 +46,6 @@ export default function MatchTable({
     setCheckinIdToChange?.(checkinId);
   }
 
-  console.log(onMoveItem && teamData && teamData.length > 0);
-
   return (
     <Table aria-label="Table">
       <TableHeader>
