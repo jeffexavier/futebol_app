@@ -44,7 +44,7 @@ def update_checkin_route(id, checkin_up: CheckinUpdate, db: Session = Depends(ge
     return updated_checkin
 
 @router.patch("/{id}", response_model=CheckinResponse, status_code=status.HTTP_202_ACCEPTED)
-def update_position_checkin_route(id, checkin_up_pos: CheckinUpdatePosition, db: Session = Depends(get_db)):
+def update_checkin_position_route(id, checkin_up_pos: CheckinUpdatePosition, db: Session = Depends(get_db)):
     updated_position_checkin = checkin_service.update_checkin_position(db=db, checkin_id = id, checkin_up_pos=checkin_up_pos )
 
     return updated_position_checkin
