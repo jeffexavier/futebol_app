@@ -46,6 +46,8 @@ export default function MatchTable({
     setCheckinIdToChange?.(checkinId);
   }
 
+  console.log(onMoveItem && teamData && teamData.length > 0);
+
   return (
     <Table aria-label="Table">
       <TableHeader>
@@ -59,9 +61,7 @@ export default function MatchTable({
       >
         <Fragment>
           { onMoveItem && teamData && teamData.length > 0 &&
-            <TableRow className="dark cursor-pointer h-12 bg-foreground-100" key={`${teamData[0].id}, emptySpace`} onClick={() => handleChooseNewPosition?.(teamData[0
-              
-            ].id, PositionChoice.Before, chosenTeam)}>
+            <TableRow className="dark cursor-pointer h-12 bg-foreground-100" key={`${teamData[0].id}, firstEmptySpace`} onClick={() => handleChooseNewPosition?.(teamData[0].id, PositionChoice.Before, chosenTeam)}>
               <TableCell>
                 {""}
               </TableCell>
