@@ -2,16 +2,17 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import select, func, or_
 from datetime import datetime
+from decimal import Decimal
 
 from app.models.checkin import Checkin
 from app.models.player import Player
-from app.schemas.checkin import TeamSide, CheckinCreate, CheckinUpdate
+from app.schemas.checkin import TeamSide, CheckinCreate, CheckinUpdate, CheckinUpdatePosition
 from app.schemas.player import PlayerCreate
 from app.services import audit_log_service, player_service
 
 def get_next_position(db:Session) -> int:
     max_pos = db.query(func.max(Checkin.queue_position)).scalar()
-    return(max_pos or 0) + 1
+    return(max_pos or Decimal('0')) + Decimal('1')
 
 def create_checkin(db: Session, checkin_in: CheckinCreate):
     player_name = checkin_in.name.strip().title()
@@ -67,17 +68,19 @@ def create_checkin(db: Session, checkin_in: CheckinCreate):
 
     return db_checkin
  
-def get_checkins(db: Session, only_active: bool = None, limit: int = 100):
+def get_checkins(db: Session, active: bool = None, limit: int = 100):
     
     query = select(Checkin)
 
-    if only_active != None:
-        if only_active == True:
+    if active != None:
+        if active == True:
             query = query.where(Checkin.deleted_at == None)
-        elif only_active == False:
+        elif active == False:
             query = query.where(Checkin.deleted_at != None)
 
     query = query.limit(limit)
+
+    query = query.order_by(Checkin.queue_position.asc());
 
     result = db.scalars(query)
 
@@ -93,7 +96,10 @@ def update_checkin(db: Session, checkin_id: int, checkin_up: CheckinUpdate):
     db_checkin = db.get(Checkin, checkin_id)
 
     if not db_checkin:
-        return None
+        raise HTTPException (
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Checkin não encontrado!"
+        )
 
     update_data = checkin_up.model_dump(exclude_unset=True)
 
@@ -103,6 +109,74 @@ def update_checkin(db: Session, checkin_id: int, checkin_up: CheckinUpdate):
     db.add(db_checkin)
 
     audit_log_service.create_log(db, f"Checkin ID = {db_checkin.id} foi atualizado.")    
+    db.commit()
+
+    db.refresh(db_checkin)
+
+    return db_checkin
+
+def update_checkin_position(db: Session, checkin_id: int, checkin_up_pos: CheckinUpdatePosition):
+
+    db_checkin = db.get(Checkin, checkin_id)
+    if not db_checkin:
+        raise HTTPException (
+            status_code = status.HTTP_404_NOT_FOUND,
+            detail = "Checkin não encontrado!"
+        )
+
+    before_pos = None
+    after_pos = None
+
+    if checkin_up_pos.before_checkin_id is not None:
+        before_checkin = db.query(Checkin).filter(Checkin.id == checkin_up_pos.before_checkin_id).first()
+        if before_checkin:
+            before_pos = before_checkin.queue_position
+    
+    if checkin_up_pos.after_checkin_id is not None:
+        after_checkin = db.query(Checkin).filter(Checkin.id == checkin_up_pos.after_checkin_id).first()
+        if after_checkin:
+            after_pos = after_checkin.queue_position
+
+    new_position = None
+
+    if before_pos is not None:
+        next_pos_checkin = db.query(
+            Checkin
+        ).filter(
+            Checkin.queue_position > before_pos
+        ).order_by(
+            Checkin.queue_position.asc()
+        ).first()
+
+        if next_pos_checkin:
+            new_position = (before_pos + next_pos_checkin.queue_position) / Decimal('2')
+        else:
+            new_position = get_next_position(db)
+    elif after_pos is not None:
+        prev_pos_checkin = db.query(
+            Checkin
+        ).filter(
+            Checkin.queue_position < after_pos
+        ).order_by(
+            Checkin.queue_position.desc()
+        ).first()
+
+        if prev_pos_checkin:
+            new_position = (after_pos + prev_pos_checkin.queue_position) / Decimal('2')
+        else:
+            new_position = after_pos / Decimal('2')
+    else:
+        raise HTTPException (
+            status_code = status.HTTP_404_NOT_FOUND,
+            detail = "Nenhum checkin anterior ou posterior encontrado! Nenhuma mudança foi realizada!"
+        )
+
+    if new_position is not None:
+        db_checkin.queue_position = new_position
+
+    if checkin_up_pos.team:
+        db_checkin.team = checkin_up_pos.team
+
     db.commit()
 
     db.refresh(db_checkin)

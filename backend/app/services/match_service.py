@@ -21,8 +21,8 @@ def get_current_match_state(db: Session) -> MatchStateResponse:
     checkins_team_b = db.scalars(query_team_b).all()
     checkins_waiting = db.scalars(query_waiting).all()
  
-    t_a = checkins_team_a[:7]
-    t_b = checkins_team_b[:7]
+    t_a = checkins_team_a
+    t_b = checkins_team_b
     w_t_1 = checkins_waiting[:7]
     w_t_2 = checkins_waiting[7:14]
     f_l = checkins_waiting[14:]
@@ -59,6 +59,10 @@ def randomize_first_teams(db: Session):
     checkins = db.scalars(query).all()  
 
     first_teams_checkins = checkins[0:14]
+
+    for index, checkin in enumerate(first_teams_checkins):
+        checkin.queue_position = index + 1
+
     random.shuffle(first_teams_checkins)
 
     new_team_a = first_teams_checkins[:7]
@@ -83,12 +87,10 @@ def randomize_first_teams(db: Session):
     player_names_ft = []
 
     for index, checkin in enumerate(real_checkins_team_a):
-        checkin.queue_position = index + 1
         checkin.team = TeamSide.TEAM_A
         player_names_t_a.append(checkin.player.name)
 
     for index, checkin in enumerate(real_checkins_team_b):
-        checkin.queue_position = index + 8
         checkin.team = TeamSide.TEAM_B
         player_names_t_b.append(checkin.player.name)
 

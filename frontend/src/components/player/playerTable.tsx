@@ -19,8 +19,6 @@ export default function PlayerTable() {
 
     async function getPLayersList() {
         const list = await getPlayers()
-
-        console.log(list)
         
         setPlayersList(list)
     }

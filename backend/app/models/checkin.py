@@ -1,7 +1,8 @@
-from sqlalchemy import Integer, BigInteger, String, Boolean, DateTime, ForeignKey, Enum as SqlEnum, Index, text
+from sqlalchemy import Integer, BigInteger, String, Boolean, Numeric, DateTime, ForeignKey, Enum as SqlEnum, Index, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
 from typing import Optional
+from decimal import Decimal
 from enum import Enum
 from app.schemas.checkin import TeamSide
 from app.database import Base
@@ -12,7 +13,7 @@ class Checkin(Base):
     id: Mapped[int] = mapped_column(primary_key=True, index=True)    
     player_id: Mapped[int] = mapped_column(Integer, ForeignKey("players.id"))
     arrival_time: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
-    queue_position: Mapped[int] = mapped_column(BigInteger, index=True)
+    queue_position: Mapped[Decimal] = mapped_column(Numeric(precision=30, scale=20), index=True, unique=True)
     team: Mapped[Optional[TeamSide]] = mapped_column(SqlEnum(TeamSide), nullable=True)
     deleted_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
 
@@ -20,7 +21,7 @@ class Checkin(Base):
 
     __table_args__ = (
         Index(
-            "is_unique_active_checkin_per_player", # Nome do índice
+            "is_unique_active_checkin_per_player", # Nome do índice 
             "player_id", # Coluna avaliada
             unique=True, # É um índice único
             sqlite_where=text("deleted_at IS NULL") # Condição para o SQLite

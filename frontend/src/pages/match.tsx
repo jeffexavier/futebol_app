@@ -11,7 +11,6 @@ export default function Match() {
     const matchTeamsList = await getMatch();
 
     setMatchData(matchTeamsList);
-    console.log(matchTeamsList);
   }
 
   useEffect(() => {

@@ -17,7 +17,7 @@ import {
 import { useState } from "react";
 import { Select, SelectItem } from "@heroui/select";
 
-import { PencilSquareIcon, TrashIcon } from "../icons";
+import { PencilSquareIcon, TrashIcon, ArrowsUpDownIcon } from "../icons";
 
 import { updateCheckin, deleteCheckin } from "@/services/checkin";
 
@@ -25,12 +25,14 @@ interface ActionButtonsProps {
   fromAdminPage: boolean | null;
   checkinItem: CheckinItem;
   onSuccess?: () => void;
+  setOnMoveItem?: () => void;
 }
 
 export default function ActionButtons({
   fromAdminPage,
   checkinItem,
   onSuccess,
+  setOnMoveItem
 }: ActionButtonsProps) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [updateTeam, setUpdateTeam] = useState<string>("");
@@ -39,6 +41,7 @@ export default function ActionButtons({
     try {
       await updateCheckin(checkinId, team);
       onSuccess?.();
+      setIsOpen(false);
     } catch (error) {
       console.error(error);
     }
@@ -48,12 +51,13 @@ export default function ActionButtons({
     try {
       await deleteCheckin(checkinId);
       onSuccess?.();
+      setIsOpen(false);
     } catch (error) {
       console.error(error);
     }
   }
 
-  function handleOpenMOdal() {
+  function handleOpenModal() {
     setTimeout(() => {
       setIsOpen(true);
     }, 0);
@@ -77,20 +81,32 @@ export default function ActionButtons({
         </DropdownTrigger>
         <DropdownMenu aria-label="Ações do Jogador">
           <DropdownItem
+            key="atualizar"
+            color="warning"
+            endContent={<PencilSquareIcon width={16} />}
+            onPress={handleOpenModal}
+          >
+            Atualizar
+          </DropdownItem>
+          {
+          true &&
+          <DropdownItem
+            key="mudar posição"
+            color="primary"
+            endContent={<ArrowsUpDownIcon width={16} />}
+            onPress={setOnMoveItem}
+          >
+            Mudar posição
+          </DropdownItem>
+          }
+          <DropdownItem
             key="deletar"
+            className="text-danger"
             color="danger"
             endContent={<TrashIcon width={16} />}
             onPress={() => handleDeleteCheckin(checkinItem.id)}
           >
             Deletar
-          </DropdownItem>
-          <DropdownItem
-            key="atualizar"
-            color="warning"
-            endContent={<PencilSquareIcon width={16} />}
-            onPress={handleOpenMOdal}
-          >
-            Atualizar
           </DropdownItem>
         </DropdownMenu>
       </Dropdown>
