@@ -32,6 +32,7 @@ export default function ActionButtons({
   fromAdminPage,
   checkinItem,
   onSuccess,
+  setOnMoveItem
 }: ActionButtonsProps) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [updateTeam, setUpdateTeam] = useState<string>("");
@@ -93,7 +94,7 @@ export default function ActionButtons({
             key="mudar posição"
             color="primary"
             endContent={<ArrowsUpDownIcon width={16} />}
-            onPress={handleOpenModal}
+            onPress={setOnMoveItem}
           >
             Mudar posição
           </DropdownItem>

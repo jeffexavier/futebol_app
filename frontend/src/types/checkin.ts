@@ -9,3 +9,9 @@ export interface CheckinItem {
   deleted_at: string | null;
   player: Player;
 }
+
+export interface UpdatePositionCheckin {
+  beforeCheckinId: number | null;
+  afterCheckinId: number | null;
+  team: string | null;
+}

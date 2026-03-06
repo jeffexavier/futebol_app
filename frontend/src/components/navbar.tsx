@@ -22,8 +22,6 @@ interface NavbarProps {
 }
 
 export default function Navbar({fromAdminPage}: NavbarProps) {
-
-  console.log("#---------------------------------------------------------------------- ", fromAdminPage)
   return (
     <HeroUINavbar maxWidth="xl" position="sticky">
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
