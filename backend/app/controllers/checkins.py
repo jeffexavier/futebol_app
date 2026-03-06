@@ -4,7 +4,7 @@ from typing import List
 
 #from app.database import SessionLocal
 from app.dependencies import get_db
-from app.schemas.checkin import CheckinCreate, CheckinUpdate, CheckinResponse
+from app.schemas.checkin import CheckinCreate, CheckinUpdate, CheckinUpdatePosition, CheckinResponse
 from app.schemas.player import PlayerCreate
 from app.services import checkin_service
 
@@ -15,8 +15,8 @@ def create_checkin_route(checkin_in: CheckinCreate, db: Session = Depends(get_db
     return checkin_service.create_checkin(db = db, checkin_in = checkin_in)
 
 @router.get("/", response_model=List[CheckinResponse], status_code=status.HTTP_200_OK)
-def get_checkins_route(db:Session = Depends(get_db), only_active: bool = None, limit: int = 10):
-    return checkin_service.get_checkins(db=db, only_active=only_active, limit=limit)
+def get_checkins_route(db:Session = Depends(get_db), active: bool = None, limit: int = 10):
+    return checkin_service.get_checkins(db, active, limit)
 
 @router.get("/{id}", response_model=CheckinResponse, status_code=status.HTTP_200_OK)
 def get_checkin_route(id, db: Session = Depends(get_db)):
@@ -33,7 +33,7 @@ def get_checkin_route(id, db: Session = Depends(get_db)):
 
 @router.put("/{id}", response_model=CheckinResponse, status_code=status.HTTP_202_ACCEPTED)
 def update_checkin_route(id, checkin_up: CheckinUpdate, db: Session = Depends(get_db)):
-    updated_checkin = checkin_service.update_checkin(db = db, checkin_id=id, checkin_up = checkin_up)
+    updated_checkin = checkin_service.update_checkin(db=db, checkin_id=id, checkin_up=checkin_up)
 
     if not updated_checkin:
         raise HTTPException(
@@ -43,6 +43,11 @@ def update_checkin_route(id, checkin_up: CheckinUpdate, db: Session = Depends(ge
     
     return updated_checkin
 
+@router.patch("/{id}", response_model=CheckinResponse, status_code=status.HTTP_202_ACCEPTED)
+def update_checkin_position_route(id, checkin_up_pos: CheckinUpdatePosition, db: Session = Depends(get_db)):
+    updated_position_checkin = checkin_service.update_checkin_position(db=db, checkin_id = id, checkin_up_pos=checkin_up_pos )
+
+    return updated_position_checkin
 
 @router.delete("/{id}", response_model=CheckinResponse, status_code=status.HTTP_200_OK)
 def delete_checkin_route(id, db: Session = Depends(get_db)):
